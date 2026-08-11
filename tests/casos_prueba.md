@@ -61,3 +61,33 @@ de error mediante STDERR y finalizar con código de salida 1.
 **EN:**  
 The system must reject the empty file, display an error message
 through STDERR, and terminate with exit code 1.
+---
+
+## CP-04 - Formato FASTA incorrecto / Invalid FASTA Format
+
+### Entrada / Input
+
+`tests/data/fasta_invalido.faa`
+
+### Condición de prueba / Test Condition
+
+**ES:**  
+El archivo contiene una secuencia, pero el identificador no comienza
+con el símbolo `>` requerido por el formato FASTA.
+
+**EN:**  
+The file contains a sequence, but the identifier does not begin
+with the `>` symbol required by the FASTA format.
+
+### Resultado esperado / Expected Result
+
+**ES:**  
+El sistema debe detectar que el archivo no cumple con el formato
+FASTA esperado, mostrar un mensaje de error mediante STDERR y
+finalizar con código de salida 1. El procesamiento de BLAST no
+debe comenzar.
+
+**EN:**  
+The system must detect that the file does not comply with the
+expected FASTA format, display an error message through STDERR,
+and terminate with exit code 1. BLAST processing must not start.

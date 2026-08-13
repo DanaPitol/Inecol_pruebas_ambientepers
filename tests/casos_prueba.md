@@ -14,6 +14,18 @@ of the tool during the development of HU-01.
 
 `tests/data/fasta_valido.faa`
 
+### Función evaluada / Function Under Test
+
+`validate_fasta_file()`
+
+### Prueba automatizada / Automated Test
+
+`biocol/tests/test_fasta_validator.py::test_existing_valid_fasta`
+
+### Estado / Status
+
+✅ Aprobado / Passed
+
 ### Resultado esperado / Expected Result
 
 **ES:**  
@@ -31,6 +43,18 @@ processing.
 ### Entrada / Input
 
 `tests/data/multifasta_multilinea.faa`
+
+### Función evaluada / Function Under Test
+
+`read_fasta()`
+
+### Prueba automatizada / Automated Test
+
+`biocol/tests/test_multifasta_multilinea.py::test_read_multiline_multifasta`
+
+### Estado / Status
+
+✅ Aprobado / Passed
 
 ### Resultado esperado / Expected Result
 
@@ -52,6 +76,18 @@ across multiple lines.
 
 `tests/data/fasta_vacio.faa`
 
+### Función evaluada / Function Under Test
+
+`validate_fasta_file()`
+
+### Prueba automatizada / Automated Test
+
+`biocol/tests/test_fasta_validator.py::test_empty_fasta`
+
+### Estado / Status
+
+✅ Aprobado / Passed
+
 ### Resultado esperado / Expected Result
 
 **ES:**  
@@ -69,6 +105,18 @@ through STDERR, and terminate with exit code 1.
 ### Entrada / Input
 
 `tests/data/fasta_invalido.faa`
+
+### Función evaluada / Function Under Test
+
+`validate_fasta_file()`
+
+### Prueba automatizada / Automated Test
+
+`biocol/tests/test_fasta_invalido.py::test_invalid_fasta_format`
+
+### Estado / Status
+
+✅ Aprobado / Passed
 
 ### Condición de prueba / Test Condition
 
@@ -101,6 +149,20 @@ and terminate with exit code 1. BLAST processing must not start.
 
 `tests/data/fasta_type.fna`
 
+### Estado / Status
+
+⏳ Pendiente / Pending
+
+**ES:**  
+La detección del tipo de secuencia ya está implementada, pero la
+validación de compatibilidad entre la query y el tipo de análisis BLAST
+todavía no está implementada.
+
+**EN:**  
+Sequence type detection is already implemented, but validation of
+compatibility between the query and the BLAST analysis type has not
+been implemented yet.
+
 ### Condición de prueba / Test Condition
 
 **ES:**
@@ -126,6 +188,18 @@ code 1. BLAST processing must not start.
 ---
 
 ## CP-06 - Base de datos inexistente / Missing Database
+
+### Estado / Status
+
+⏳ Pendiente / Pending
+
+**ES:**  
+La validación y manejo de la base de datos todavía no están
+implementados en el backend.
+
+**EN:**  
+Database validation and handling have not yet been implemented
+in the backend.
 
 ### Condición de prueba / Test Condition
 

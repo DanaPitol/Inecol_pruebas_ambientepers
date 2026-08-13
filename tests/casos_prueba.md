@@ -149,19 +149,36 @@ and terminate with exit code 1. BLAST processing must not start.
 
 `tests/data/fasta_type.fna`
 
+
 ### Estado / Status
 
-⏳ Pendiente / Pending
+🟡 Parcialmente cubierto / Partially covered
+
+### Funciones evaluadas / Functions Under Test
+
+`detect_sequence_type()`
+
+`detect_query_type()`
+
+### Pruebas automatizadas relacionadas / Related Automated Tests
+
+`biocol/tests/test_detect_sequence_type.py::test_detect_from_dna_fasta`
+
+`biocol/tests/test_detect_sequence_type.py::test_detect_from_rna_fasta`
+
+`biocol/tests/test_detect_sequence_type.py::test_detect_from_protein_fasta`
+
+`biocol/tests/test_detect_sequence_type.py::test_mixed_multifasta_raises`
 
 **ES:**  
-La detección del tipo de secuencia ya está implementada, pero la
-validación de compatibilidad entre la query y el tipo de análisis BLAST
-todavía no está implementada.
+La detección del tipo de secuencia ya está implementada y probada. Sin embargo,
+la validación de compatibilidad entre el tipo de query, el tipo de base de datos
+y el análisis BLAST correspondiente todavía no está implementada.
 
 **EN:**  
-Sequence type detection is already implemented, but validation of
-compatibility between the query and the BLAST analysis type has not
-been implemented yet.
+Sequence type detection is already implemented and tested. However,
+compatibility validation between the query type, database type, and the
+corresponding BLAST analysis has not yet been implemented.
 
 ### Condición de prueba / Test Condition
 

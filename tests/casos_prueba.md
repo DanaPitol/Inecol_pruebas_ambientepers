@@ -61,6 +61,7 @@ de error mediante STDERR y finalizar con código de salida 1.
 **EN:**  
 The system must reject the empty file, display an error message
 through STDERR, and terminate with exit code 1.
+
 ---
 
 ## CP-04 - Formato FASTA incorrecto / Invalid FASTA Format
@@ -91,6 +92,7 @@ debe comenzar.
 The system must detect that the file does not comply with the
 expected FASTA format, display an error message through STDERR,
 and terminate with exit code 1. BLAST processing must not start.
+
 ---
 
 ## CP-05 - Tipo FASTA incorrecto / Invalid FASTA Type
@@ -120,4 +122,28 @@ El procesamiento de BLAST no debe comenzar.
 System must detect that file is in FASTA format, but does not cointain
 the information type required for the process, and terminate with exit 
 code 1. BLAST processing must not start.
+
+---
+
+## CP-06 - Base de datos inexistente / Missing Database
+
+### Condición de prueba / Test Condition
+
+**ES:**  
+El usuario proporciona una ruta hacia una base de datos que no existe.
+
+**EN:**  
+The user provides a path to a database that does not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**  
+El sistema debe detectar que la base de datos no existe, mostrar
+un mensaje de error mediante STDERR y finalizar con código de salida 1.
+BLAST no debe comenzar.
+
+**EN:**  
+The system must detect that the database does not exist, display
+an error message through STDERR, and terminate with exit code 1.
+BLAST must not start.
 

@@ -1,0 +1,58 @@
+from pathlib import Path
+
+import pytest
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+
+from biocol.exceptions import MixedSequenceTypeError
+from biocol.sequence.classifier import detect_query_type, detect_sequence_type
+from biocol.sequence.reader import read_fasta
+
+
+def test_detect_dna() -> None:
+    assert detect_sequence_type("ATGCGATCGTAGCTAG") == "nucleotide"
+
+
+def test_detect_rna() -> None:
+    assert detect_sequence_type("AUGCGAUCGAUCGAUC") == "nucleotide"
+
+
+def test_detect_protein() -> None:
+    assert detect_sequence_type("MVLSPADKTNVKAAWGKVGAHAGEYGAEALER") == "protein"
+
+
+def test_detect_from_seq_and_seqrecord() -> None:
+    assert detect_sequence_type(Seq("ATGCGATCGTAG")) == "nucleotide"
+    record = SeqRecord(Seq("MVLSPADKTNVKAAWGKV"), id="p1")
+    assert detect_sequence_type(record) == "protein"
+
+
+def test_detect_from_dna_fasta(fixtures_dir: Path) -> None:
+    records = read_fasta(fixtures_dir / "dna.fa")
+    assert detect_query_type(records) == "nucleotide"
+
+
+def test_detect_from_rna_fasta(fixtures_dir: Path) -> None:
+    records = read_fasta(fixtures_dir / "rna.fa")
+    assert detect_query_type(records) == "nucleotide"
+
+
+def test_detect_from_protein_fasta(fixtures_dir: Path) -> None:
+    records = read_fasta(fixtures_dir / "protein.fa")
+    assert detect_query_type(records) == "protein"
+
+
+def test_detect_multifasta_same_type(fixtures_dir: Path) -> None:
+    records = read_fasta(fixtures_dir / "multi.fa")
+    assert detect_query_type(records) == "nucleotide"
+
+
+def test_mixed_multifasta_raises(fixtures_dir: Path) -> None:
+    records = read_fasta(fixtures_dir / "mixed.fa")
+    with pytest.raises(MixedSequenceTypeError):
+        detect_query_type(records)
+
+
+def test_unclassifiable_sequence_raises() -> None:
+    with pytest.raises(ValueError, match="clasificables"):
+        detect_sequence_type("---")

@@ -91,3 +91,33 @@ debe comenzar.
 The system must detect that the file does not comply with the
 expected FASTA format, display an error message through STDERR,
 and terminate with exit code 1. BLAST processing must not start.
+---
+
+## CP-05 - Tipo FASTA incorrecto / Invalid FASTA Type
+
+### Entrada / Input
+
+`tests/data/fasta_type.fna`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El archivo contiene una secuencia nucleotídica, pero se requiere
+una secuencia de aminoácidos.
+
+**EN:**
+File contains a nucleotidic sequence, but it is required to be aminoacidic.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El sistema debe detectar que el archivo tiene un formato FAST pero
+que no contiene el tipo de información requerida para el proceso, mostrar
+un mensaje de error mediante STDERR y finalizar con código de salida 1. 
+El procesamiento de BLAST no debe comenzar.
+
+**EN:**
+System must detect that file is in FASTA format, but does not cointain
+the information type required for the process, and terminate with exit 
+code 1. BLAST processing must not start.
+

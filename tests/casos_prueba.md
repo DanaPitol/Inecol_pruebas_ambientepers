@@ -238,3 +238,48 @@ The system must detect that the database does not exist, display
 an error message through STDERR, and terminate with exit code 1.
 BLAST must not start.
 
+---
+
+## CP-07 - Encabezado FASTA con descriptor / FASTA Header with Descriptor
+
+### Entrada / Input
+
+`biocol/tests/fixtures/protein_with_descriptor.fa`
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`read_fasta()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_fasta_descriptor.py::test_fasta_header_with_descriptor`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El archivo FASTA contiene un encabezado formado por un identificador
+seguido de un descriptor con información adicional sobre la secuencia.
+
+Ejemplo:
+
+    >XP_002862155.2 protochlorophyllide reductase A, chloroplastic [Arabidopsis lyrata subsp. lyrata]
+
+**EN:**
+The FASTA file contains a header consisting of an identifier followed
+by a descriptor with additional information about the sequence.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El sistema debe reconocer correctamente el archivo FASTA, interpretar
+`XP_002862155.2` como el identificador de la secuencia y conservar el
+encabezado completo como descripción.
+
+**EN:**
+The system must correctly recognize the FASTA file, interpret
+`XP_002862155.2` as the sequence identifier, and preserve the complete
+header as the description.

@@ -64,12 +64,14 @@ secuencias biológicas.
 Cada registro FASTA está compuesto por un encabezado y una secuencia.
 
 El encabezado comienza obligatoriamente con el símbolo `>` seguido
-del identificador de la secuencia.
+del identificador de la secuencia. Después del identificador puede
+incluirse un descriptor o descripción con información adicional
+sobre la secuencia.
 
 Ejemplo:
 
-    >seq1
-    MKTLLVAGTALAGCSTLAA
+    >XP_002862155.2 protochlorophyllide reductase A, chloroplastic [Arabidopsis lyrata subsp. lyrata]
+    MACRDFLKAERAAQSAGMPKDSYTVMHLDLASLDSVRQFVDNFRRAEMPLDVLVCNAAVYQPTANQPTFTAEGFELS
 
 La secuencia puede representar nucleótidos o aminoácidos, dependiendo
 del análisis que se vaya a realizar.
@@ -92,12 +94,13 @@ The tool uses FASTA files to represent biological sequences.
 Each FASTA record consists of a header and a sequence.
 
 The header must begin with the `>` symbol followed by the sequence
-identifier.
+identifier. A descriptor or description containing additional
+information about the sequence may appear after the identifier.
 
 Example:
 
-    >seq1
-    MKTLLVAGTALAGCSTLAA
+    >XP_002862155.2 protochlorophyllide reductase A, chloroplastic [Arabidopsis lyrata subsp. lyrata]
+    MACRDFLKAERAAQSAGMPKDSYTVMHLDLASLDSVRQFVDNFRRAEMPLDVLVCNAAVYQPTANQPTFTAEGFELS
 
 The sequence may represent nucleotides or amino acids depending on
 the analysis to be performed.

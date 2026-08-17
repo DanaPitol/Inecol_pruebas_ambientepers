@@ -23,11 +23,8 @@ Listo:
 - elegir el programa BLAST (`select_blast_program`)
 - ejecutar BLAST+ (`run_blast`: `makeblastdb` temporal, un run por FASTA, `outfmt 6`)
 - parsear tabular (`parse_blast_results`); queries sin hit → fila vacía
-
-Aún no:
-
-- accesiones / descriptores
-- CSV final
+- leer accesiones (`accession<TAB>descriptor`) y unir descriptores
+- armar y escribir el CSV final (`build_result_table` + `write_results_csv`)
 
 ## Instalación
 
@@ -105,7 +102,12 @@ Las pruebas nuevas pueden ir en `tests/` usando fixtures propios o archivos real
 Todavía no hay punto de entrada de consola. El CLI debe llamar las mismas funciones:
 
 ```python
-from biocol import run_blast, parse_blast_results
+from biocol import (
+    run_blast,
+    parse_blast_results,
+    build_result_table,
+    write_results_csv,
+)
 
 hits = run_blast(
     args.fasta,
@@ -116,9 +118,30 @@ hits = run_blast(
 )
 # Camino 2 (BLAST tabular ya existente):
 # hits = parse_blast_results(args.blast_txt)
+
+table = build_result_table(
+    hits,
+    args.accessions,
+    query_fasta=args.fasta,  # None en el camino 2
+)
+write_results_csv(table, args.output)  # default: results.csv
 ```
 
-`run_blast` crea bases temporales con `makeblastdb`, lanza un BLAST por FASTA de la carpeta y parsea `outfmt 6`. El `.txt` no se conserva; el CSV final (con accesiones) vendrá después. Queries sin hit quedan como fila vacía.
+`run_blast` crea bases temporales con `makeblastdb`, lanza un BLAST por FASTA de la carpeta y parsea `outfmt 6`. El `.txt` no se conserva. El CSV es el resultado oficial.
+
+### CSV final
+
+Tabla ancha al estilo Dataset S2 (sin Pfam, KEGG ni GO). Una fila por query y rango de hit: el rango 1 es el mejor hit de cada base, el 2 el segundo, etc. Se conservan todos los hits.
+
+Columnas de query (solo se llenan si hay FASTA y el tipo corresponde):
+
+`gene_id`, `length_nt`, `cdna_sequence`, `length_aa`, `protein_sequence`
+
+Por cada FASTA de base (`stem` del archivo), bloque:
+
+`{db}_accession`, `{db}_description`, `{db}_identity_pct`, `{db}_alignment_length`, `{db}_evalue`, `{db}_score`
+
+Sin match de descriptor o sin hit en ese rango: `---` en accession/description. En el camino 2 (sin FASTA de query) las columnas de secuencia quedan vacías.
 
 ### Reglas para el tipo de BLAST
 
@@ -140,8 +163,11 @@ hits = run_blast(
 src/biocol/           backend
   sequence/           lectura, validación y tipo de query
   blast/              tipo de base, selección, ejecución y parseo tabular
+  metadata/           accesiones y descriptores
+  processing/         tabla ancha de resultados
+  output/             escritura del CSV
 tests/                pruebas (pytest)
-tests/fixtures/       FASTA y BLAST outfmt 6 de ejemplo
+tests/fixtures/       FASTA, BLAST outfmt 6 y accesiones de ejemplo
 ```
 
 La lectura de FASTA usa `Bio.SeqIO`. Los alfabetos nucleótido/proteína salen de `Bio.Data.IUPACData`.

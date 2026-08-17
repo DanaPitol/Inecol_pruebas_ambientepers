@@ -9,6 +9,7 @@ description = "Backend para análisis y procesamiento de BLAST"
 requires-python = ">=3.10"
 dependencies = [
     "biopython>=1.83",
+    "pandas>=2.0",
 ]
 
 [project.optional-dependencies]

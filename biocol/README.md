@@ -21,11 +21,11 @@ Listo:
 - detectar si la query es nucleótido o proteína (`U` cuenta como nucleótido)
 - detectar tipo de base de datos (un FASTA o una carpeta con FASTA, incluidas subcarpetas)
 - elegir el programa BLAST (`select_blast_program`)
+- ejecutar BLAST+ (`run_blast`: `makeblastdb` temporal, un run por FASTA, `outfmt 6`)
+- parsear tabular (`parse_blast_results`); queries sin hit → fila vacía
 
 Aún no:
 
-- ejecución de BLAST
-- parseo tabular
 - accesiones / descriptores
 - CSV final
 
@@ -105,22 +105,20 @@ Las pruebas nuevas pueden ir en `tests/` usando fixtures propios o archivos real
 Todavía no hay punto de entrada de consola. El CLI debe llamar las mismas funciones:
 
 ```python
-from biocol import (
-    read_fasta,
-    detect_query_type,
-    detect_database_type,
-    select_blast_program,
-)
+from biocol import run_blast, parse_blast_results
 
-records = read_fasta(args.fasta)
-query_type = detect_query_type(records)
-database_type = detect_database_type(args.db)
-program = select_blast_program(
-    query_type,
-    database_type,
-    translated=args.tblastx,  # False por defecto; True solo si el usuario pide tblastx
+hits = run_blast(
+    args.fasta,
+    args.db,
+    translated=args.tblastx,  # False por defecto
+    evalue=args.evalue,       # default 10
+    max_target_seqs=args.max_target_seqs,  # default 500
 )
+# Camino 2 (BLAST tabular ya existente):
+# hits = parse_blast_results(args.blast_txt)
 ```
+
+`run_blast` crea bases temporales con `makeblastdb`, lanza un BLAST por FASTA de la carpeta y parsea `outfmt 6`. El `.txt` no se conserva; el CSV final (con accesiones) vendrá después. Queries sin hit quedan como fila vacía.
 
 ### Reglas para el tipo de BLAST
 
@@ -141,9 +139,9 @@ program = select_blast_program(
 ```
 src/biocol/           backend
   sequence/           lectura, validación y tipo de query
-  blast/              tipo de base y selección del programa BLAST
+  blast/              tipo de base, selección, ejecución y parseo tabular
 tests/                pruebas (pytest)
-tests/fixtures/       FASTA de ejemplo
+tests/fixtures/       FASTA y BLAST outfmt 6 de ejemplo
 ```
 
 La lectura de FASTA usa `Bio.SeqIO`. Los alfabetos nucleótido/proteína salen de `Bio.Data.IUPACData`.

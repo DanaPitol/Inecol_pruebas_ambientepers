@@ -307,3 +307,48 @@ encabezado completo como descripción.
 The system must correctly recognize the FASTA file, interpret
 `XP_002862155.2` as the sequence identifier, and preserve the complete
 header as the description.
+
+---
+
+## CP-08 - Bases de datos con tipos mezclados / Mixed Database Types
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`detect_database_type()`
+
+`list_blast_databases()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_selection.py::test_folder_mixed_types_raises`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe una carpeta que contiene al menos un archivo
+FASTA con secuencias nucleotídicas y otro archivo FASTA con secuencias
+proteicas.
+
+**EN:**
+The tool receives a directory containing at least one FASTA file with
+nucleotide sequences and another FASTA file with protein sequences.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El backend debe detectar que la carpeta contiene bases de datos de tipos
+diferentes y generar una excepción `MixedDatabaseTypeError`.
+
+No debe seleccionarse ningún programa BLAST mientras la entrada de bases
+de datos no sea homogénea.
+
+**EN:**
+The backend must detect that the directory contains databases of
+different types and raise a `MixedDatabaseTypeError`.
+
+No BLAST program should be selected while the database input is not
+homogeneous.

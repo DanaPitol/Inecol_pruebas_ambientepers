@@ -6,7 +6,7 @@ from Bio.Data.IUPACData import (
     extended_protein_letters,
 )
 
-NUCLEOTIDE_LETTERS = set((ambiguous_dna_letters + ambiguous_rna_letters).upper())
+NUCLEOTIDE_LETTERS = set((ambiguous_dna_letters + ambiguous_rna_letters).upper()) # SET lo hace un conjunto de letras sin repetir
 PROTEIN_LETTERS = set(extended_protein_letters.upper())
 GAP_LETTERS = {"-", "."}
 VALID_RESIDUES = NUCLEOTIDE_LETTERS | PROTEIN_LETTERS | GAP_LETTERS | {"*"}

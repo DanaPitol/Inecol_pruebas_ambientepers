@@ -56,3 +56,18 @@ def test_mixed_multifasta_raises(fixtures_dir: Path) -> None:
 def test_unclassifiable_sequence_raises() -> None:
     with pytest.raises(ValueError, match="clasificables"):
         detect_sequence_type("---")
+
+
+def test_detect_sequence_type_logs_classification(caplog: pytest.LogCaptureFixture) -> None:
+    with caplog.at_level("INFO", logger="biocol.sequence.classifier"):
+        detect_sequence_type("ATGCGATCGTAGCTAG")
+    assert "tipo=nucleotide" in caplog.text
+
+
+def test_detect_query_type_logs_fasta_type(
+    fixtures_dir: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    records = read_fasta(fixtures_dir / "protein.fa")
+    with caplog.at_level("INFO", logger="biocol.sequence.classifier"):
+        detect_query_type(records)
+    assert "FASTA clasificado como protein" in caplog.text

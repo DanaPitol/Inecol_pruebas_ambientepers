@@ -19,11 +19,12 @@ Listo:
 - leer FASTA / multifasta (`.fa`, `.fasta`, `.fna`, `.faa`, `.fas`)
 - validar archivo y secuencias
 - detectar si la query es nucleótido o proteína (`U` cuenta como nucleótido)
+- detectar tipo de base de datos (un FASTA o una carpeta con FASTA, incluidas subcarpetas)
+- elegir el programa BLAST (`select_blast_program`)
 
 Aún no:
 
-- tipo de base de datos
-- selección / ejecución de BLAST
+- ejecución de BLAST
 - parseo tabular
 - accesiones / descriptores
 - CSV final
@@ -52,6 +53,9 @@ Una prueba concreta:
 ```bash
 pytest tests/test_detect_sequence_type.py -q
 ```
+
+Al correr Pytest se muestran logs INFO de la clasificación, por ejemplo
+`detect_sequence_type: id=seq1 longitud=28 tipo=nucleotide`.
 
 Hay FASTA de ejemplo en `tests/fixtures/` (ADN, ARN, proteína, multifasta, casos inválidos).
 
@@ -101,19 +105,43 @@ Las pruebas nuevas pueden ir en `tests/` usando fixtures propios o archivos real
 Todavía no hay punto de entrada de consola. El CLI debe llamar las mismas funciones:
 
 ```python
-from biocol import read_fasta, detect_query_type
+from biocol import (
+    read_fasta,
+    detect_query_type,
+    detect_database_type,
+    select_blast_program,
+)
 
 records = read_fasta(args.fasta)
 query_type = detect_query_type(records)
+database_type = detect_database_type(args.db)
+program = select_blast_program(
+    query_type,
+    database_type,
+    translated=args.tblastx,  # False por defecto; True solo si el usuario pide tblastx
+)
 ```
 
-Cuando existan más funciones (`detect_database_type`, `select_blast_program`, `run_blast`, etc.) se exportarán también en `biocol/__init__.py`.
+### Reglas para el tipo de BLAST
+
+`select_blast_program` combina **tipo de query + tipo de base**. Si ambos son nucleótido, el default es **blastn**. `translated=True` (opción explícita, desactivada por defecto) elige **tblastx**. En las demás combinaciones `translated` se ignora.
+
+| Query | Base de datos | `translated` | Programa | Qué compara |
+|-------|---------------|--------------|----------|-------------|
+| Nucleótido | Nucleótido | no se pasa / `False` (default) | `blastn` | Nucleótido contra nucleótido |
+| Nucleótido | Nucleótido | `True` (explícito) | `tblastx` | Query y base traducidas en seis marcos (proteína) |
+| Nucleótido | Proteína | se ignora | `blastx` | Query nucleotídica traducida contra proteínas |
+| Proteína | Proteína | se ignora | `blastp` | Proteína contra proteína |
+| Proteína | Nucleótido | se ignora | `tblastn` | Proteína contra traducciones de la base nucleotídica |
+
+`detect_database_type` acepta un archivo FASTA (mismas extensiones que la query: `.fa`, `.fasta`, `.fna`, `.faa`, `.fas`) o una carpeta con varios FASTA, **incluyendo subcarpetas**. Todos deben ser del mismo tipo.
 
 ## Estructura
 
 ```
 src/biocol/           backend
   sequence/           lectura, validación y tipo de query
+  blast/              tipo de base y selección del programa BLAST
 tests/                pruebas (pytest)
 tests/fixtures/       FASTA de ejemplo
 ```

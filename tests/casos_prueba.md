@@ -352,3 +352,46 @@ different types and raise a `MixedDatabaseTypeError`.
 
 No BLAST program should be selected while the database input is not
 homogeneous.
+
+---
+
+## CP-09 - Carpeta de base de datos vacía / Empty Database Directory
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`detect_database_type()`
+
+`list_blast_databases()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_selection.py::test_empty_folder_raises`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe como base de datos una ruta hacia una carpeta
+existente que no contiene archivos FASTA compatibles.
+
+**EN:**
+The tool receives an existing directory as the database source, but
+the directory does not contain compatible FASTA files.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El backend debe detectar que la carpeta no contiene archivos FASTA
+que puedan utilizarse como base de datos y generar una excepción
+`DatabaseError`.
+
+No debe seleccionarse ni ejecutarse ningún programa BLAST.
+
+**EN:**
+The backend must detect that the directory does not contain FASTA
+files that can be used as a database and raise a `DatabaseError`.
+
+No BLAST program should be selected or executed.

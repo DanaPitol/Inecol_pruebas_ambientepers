@@ -395,3 +395,53 @@ The backend must detect that the directory does not contain FASTA
 files that can be used as a database and raise a `DatabaseError`.
 
 No BLAST program should be selected or executed.
+
+---
+
+## CP-10 - Archivo de base de datos no FASTA / Non-FASTA Database File
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`detect_database_type()`
+
+`list_blast_databases()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_selection.py::test_non_fasta_file_raises`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe como base de datos la ruta de un archivo existente
+cuya extensión no corresponde a un formato FASTA soportado.
+
+Por ejemplo:
+
+    database.txt
+
+**EN:**
+The tool receives the path of an existing file as the database source,
+but its extension does not correspond to a supported FASTA format.
+
+For example:
+
+    database.txt
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El backend debe detectar que el archivo proporcionado no corresponde a
+una base de datos FASTA válida y generar una excepción `DatabaseError`.
+
+No debe seleccionarse ni ejecutarse ningún programa BLAST.
+
+**EN:**
+The backend must detect that the provided file does not correspond to a
+valid FASTA database and raise a `DatabaseError`.
+
+No BLAST program should be selected or executed.

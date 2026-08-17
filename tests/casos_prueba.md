@@ -143,12 +143,66 @@ and terminate with exit code 1. BLAST processing must not start.
 
 ---
 
-## CP-05 - Tipo FASTA incorrecto / Invalid FASTA Type
+## CP-05 - Selección de BLAST según tipo de secuencia / BLAST Selection by Sequence Type
 
-### Entrada / Input
+### Estado / Status
 
-`tests/data/fasta_type.fna`
+✅ Cubierto / Covered
 
+### Funciones evaluadas / Functions Under Test
+
+`detect_query_type()`
+
+`detect_database_type()`
+
+`select_blast_program()`
+
+### Pruebas automatizadas relacionadas / Related Automated Tests
+
+`biocol/tests/test_detect_sequence_type.py`
+
+`biocol/tests/test_blast_selection.py`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe una query y una base de datos FASTA. Ambas son
+clasificadas como `nucleotide` o `protein`.
+
+La combinación de ambos tipos determina qué programa BLAST debe
+seleccionarse.
+
+**EN:**
+The tool receives a query and a FASTA database. Both are classified as
+`nucleotide` or `protein`.
+
+The combination of both types determines which BLAST program must be
+selected.
+
+### Resultado esperado / Expected Result
+
+| Query | Base de datos / Database | Opción traducida / Translated | Programa esperado / Expected Program |
+|---|---|---|---|
+| `nucleotide` | `nucleotide` | `False` | `blastn` |
+| `nucleotide` | `nucleotide` | `True` | `tblastx` |
+| `nucleotide` | `protein` | se ignora / ignored | `blastx` |
+| `protein` | `protein` | se ignora / ignored | `blastp` |
+| `protein` | `nucleotide` | se ignora / ignored | `tblastn` |
+
+**ES:**
+La selección del programa debe realizarse correctamente sin que el
+usuario tenga que indicar manualmente el tipo de BLAST, excepto cuando
+quiera utilizar `tblastx` para una comparación nucleótido contra
+nucleótido.
+
+**EN:**
+The BLAST program must be selected correctly without requiring the
+user to manually specify the BLAST type, except when `tblastx` is
+explicitly requested for a nucleotide-versus-nucleotide comparison.
+
+------
+
+## CP-06 - Base de datos inexistente / Missing Database
 
 ### Estado / Status
 
@@ -156,88 +210,58 @@ and terminate with exit code 1. BLAST processing must not start.
 
 ### Funciones evaluadas / Functions Under Test
 
-`detect_sequence_type()`
+`detect_database_type()`
 
-`detect_query_type()`
+`list_blast_databases()`
 
-### Pruebas automatizadas relacionadas / Related Automated Tests
+### Prueba automatizada relacionada / Related Automated Test
 
-`biocol/tests/test_detect_sequence_type.py::test_detect_from_dna_fasta`
+`biocol/tests/test_blast_selection.py::test_unknown_source_raises`
 
-`biocol/tests/test_detect_sequence_type.py::test_detect_from_rna_fasta`
+**ES:**
+La validación de la existencia de la base de datos ya está implementada
+en el backend. Cuando la ruta proporcionada no corresponde a un archivo
+FASTA ni a una carpeta existente con archivos FASTA, el backend genera
+una excepción `DatabaseError`.
 
-`biocol/tests/test_detect_sequence_type.py::test_detect_from_protein_fasta`
+El manejo de esta excepción desde la interfaz de línea de comandos,
+incluyendo la salida mediante STDERR y el código de salida 1, todavía
+depende de la implementación del CLI.
 
-`biocol/tests/test_detect_sequence_type.py::test_mixed_multifasta_raises`
+**EN:**
+Database existence validation is already implemented in the backend.
+When the provided path does not correspond to a FASTA file or an
+existing directory containing FASTA files, the backend raises a
+`DatabaseError`.
 
-**ES:**  
-La detección del tipo de secuencia ya está implementada y probada. Sin embargo,
-la validación de compatibilidad entre el tipo de query, el tipo de base de datos
-y el análisis BLAST correspondiente todavía no está implementada.
-
-**EN:**  
-Sequence type detection is already implemented and tested. However,
-compatibility validation between the query type, database type, and the
-corresponding BLAST analysis has not yet been implemented.
+Handling this exception from the command-line interface, including
+STDERR output and exit code 1, still depends on the CLI implementation.
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-El archivo contiene una secuencia nucleotídica, pero se requiere
-una secuencia de aminoácidos.
-
-**EN:**
-File contains a nucleotidic sequence, but it is required to be aminoacidic.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-El sistema debe detectar que el archivo tiene un formato FAST pero
-que no contiene el tipo de información requerida para el proceso, mostrar
-un mensaje de error mediante STDERR y finalizar con código de salida 1. 
-El procesamiento de BLAST no debe comenzar.
-
-**EN:**
-System must detect that file is in FASTA format, but does not cointain
-the information type required for the process, and terminate with exit 
-code 1. BLAST processing must not start.
-
----
-
-## CP-06 - Base de datos inexistente / Missing Database
-
-### Estado / Status
-
-⏳ Pendiente / Pending
-
-**ES:**  
-La validación y manejo de la base de datos todavía no están
-implementados en el backend.
-
-**EN:**  
-Database validation and handling have not yet been implemented
-in the backend.
-
-### Condición de prueba / Test Condition
-
-**ES:**  
 El usuario proporciona una ruta hacia una base de datos que no existe.
 
-**EN:**  
+**EN:**
 The user provides a path to a database that does not exist.
 
 ### Resultado esperado / Expected Result
 
-**ES:**  
-El sistema debe detectar que la base de datos no existe, mostrar
-un mensaje de error mediante STDERR y finalizar con código de salida 1.
-BLAST no debe comenzar.
+**ES:**
+El backend debe detectar que la base de datos no existe y generar una
+excepción `DatabaseError`.
 
-**EN:**  
-The system must detect that the database does not exist, display
-an error message through STDERR, and terminate with exit code 1.
-BLAST must not start.
+Una vez integrada la interfaz de línea de comandos, el sistema deberá
+mostrar el mensaje correspondiente mediante STDERR, finalizar con
+código de salida 1 y no iniciar BLAST.
 
+**EN:**
+The backend must detect that the database does not exist and raise a
+`DatabaseError`.
+
+Once the command-line interface is integrated, the system must display
+the corresponding message through STDERR, terminate with exit code 1,
+and not start BLAST.
 ---
 
 ## CP-07 - Encabezado FASTA con descriptor / FASTA Header with Descriptor

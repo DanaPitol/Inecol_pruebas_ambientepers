@@ -1,34 +1,34 @@
 class FastaError(ValueError):
-    """Error base relacionado con archivos FASTA."""
+    """Base error for FASTA files."""
 
 
 class EmptyFastaError(FastaError):
-    """El archivo existe pero no contiene secuencias."""
+    """The file exists but contains no sequences."""
 
 
 class InvalidFastaError(FastaError):
-    """El archivo no es un FASTA válido o las secuencias no son aceptables."""
+    """The file is not a valid FASTA or the sequences are not acceptable."""
 
 
 class MixedSequenceTypeError(FastaError):
-    """Un multifasta mezcla nucleótidos y proteínas."""
+    """A multifasta mixes nucleotide and protein sequences."""
 
 
 class BlastError(ValueError):
-    """Error base de selección o ejecución de BLAST."""
+    """Base error for BLAST selection or execution."""
 
 
 class DatabaseError(BlastError):
-    """La base FASTA no existe, no se reconoce o es inválida."""
+    """The FASTA database does not exist, is unrecognized, or is invalid."""
 
 
 class MixedDatabaseTypeError(DatabaseError):
-    """Una carpeta o lista mezcla bases nucleotídicas y proteicas."""
+    """A folder or list mixes nucleotide and protein databases."""
 
 
 class BlastExecutionError(BlastError):
-    """Falló makeblastdb o la ejecución de BLAST+."""
+    """makeblastdb or BLAST+ execution failed."""
 
 
 class MetadataError(ValueError):
-    """El archivo de accesiones/descriptores no es válido."""
+    """The accessions/descriptors file is invalid."""

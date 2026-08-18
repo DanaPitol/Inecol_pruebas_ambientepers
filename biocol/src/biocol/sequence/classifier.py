@@ -26,7 +26,7 @@ def _residues(sequence: SequenceLike) -> str:
 def _sequence_id(sequence: SequenceLike) -> str:
     if isinstance(sequence, SeqRecord) and sequence.id:
         return sequence.id
-    return "<sin id>"
+    return "<no id>"
 
 
 def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
@@ -37,7 +37,7 @@ def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
     """
     residues = _residues(sequence)
     if not residues:
-        raise ValueError("La secuencia no contiene residuos clasificables")
+        raise ValueError("Sequence has no classifiable residues")
 
     if any(char in PROTEIN_ONLY_LETTERS for char in residues):
         sequence_type = "protein"
@@ -70,7 +70,7 @@ def detect_query_type(records: Iterable[SequenceLike]) -> SequenceType:
             [_sequence_id(record) for record in records_list],
         )
         raise MixedSequenceTypeError(
-            "El FASTA mezcla secuencias nucleotídicas y proteicas"
+            "FASTA mixes nucleotide and protein sequences"
         )
     query_type = types[0]
     logger.info(

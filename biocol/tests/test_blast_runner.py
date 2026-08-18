@@ -33,5 +33,5 @@ def test_blast_command_outfmt6(tmp_path: Path) -> None:
 
 def test_run_blast_requires_executable(fixtures_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("biocol.blast.runner.shutil.which", lambda _name: None)
-    with pytest.raises(BlastExecutionError, match="No se encontró"):
+    with pytest.raises(BlastExecutionError, match="was not found"):
         run_blast(fixtures_dir / "protein.fa", fixtures_dir / "protein.fa")

@@ -54,7 +54,7 @@ def test_mixed_multifasta_raises(fixtures_dir: Path) -> None:
 
 
 def test_unclassifiable_sequence_raises() -> None:
-    with pytest.raises(ValueError, match="clasificables"):
+    with pytest.raises(ValueError, match="classifiable"):
         detect_sequence_type("---")
 
 

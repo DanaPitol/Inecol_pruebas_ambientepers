@@ -12,6 +12,9 @@ dependencies = [
     "pandas>=2.0",
 ]
 
+[project.scripts]
+biocol = "biocol.cli.main:console"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",

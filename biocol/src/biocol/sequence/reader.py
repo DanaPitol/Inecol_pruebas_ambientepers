@@ -18,10 +18,10 @@ def read_fasta(path: str | Path) -> list[SeqRecord]:
     try:
         records = list(SeqIO.parse(fasta_path, "fasta"))
     except Exception as exc:
-        raise InvalidFastaError(f"No se pudo parsear el FASTA: {fasta_path}") from exc
+        raise InvalidFastaError(f"Could not parse FASTA: {fasta_path}") from exc
 
     if not records:
-        raise EmptyFastaError(f"El FASTA no contiene secuencias: {fasta_path}")
+        raise EmptyFastaError(f"FASTA contains no sequences: {fasta_path}")
 
     for record in records:
         validate_seq_record(record, fasta_path)

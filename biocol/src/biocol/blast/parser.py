@@ -30,7 +30,7 @@ def parse_blast_results(path: str | Path) -> pd.DataFrame:
     """
     blast_path = Path(path)
     if not blast_path.exists():
-        raise FileNotFoundError(f"No existe el archivo BLAST: {blast_path}")
+        raise FileNotFoundError(f"BLAST file not found: {blast_path}")
     if blast_path.stat().st_size == 0:
         return pd.DataFrame(columns=OUTFMT6_COLUMNS)
 

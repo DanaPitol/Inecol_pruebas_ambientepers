@@ -26,9 +26,9 @@ def select_blast_program(
     En las demás combinaciones ``translated`` se ignora.
     """
     if query_type not in {"nucleotide", "protein"}:
-        raise BlastError(f"Tipo de query no soportado: {query_type}")
+        raise BlastError(f"Unsupported query type: {query_type}")
     if database_type not in {"nucleotide", "protein"}:
-        raise BlastError(f"Tipo de base no soportado: {database_type}")
+        raise BlastError(f"Unsupported database type: {database_type}")
 
     both_nucleotide = query_type == "nucleotide" and database_type == "nucleotide"
     if both_nucleotide:

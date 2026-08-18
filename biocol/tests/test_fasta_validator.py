@@ -19,7 +19,7 @@ def test_missing_file(tmp_path: Path) -> None:
 def test_wrong_extension(tmp_path: Path) -> None:
     bad = tmp_path / "secuencias.txt"
     bad.write_text(">s1\nATGC\n", encoding="utf-8")
-    with pytest.raises(InvalidFastaError, match="Extensión no soportada"):
+    with pytest.raises(InvalidFastaError, match="Unsupported extension"):
         validate_fasta_file(bad)
 
 
@@ -31,15 +31,15 @@ def test_empty_fasta(tmp_path: Path) -> None:
 
 
 def test_not_fasta_content(fixtures_dir: Path) -> None:
-    with pytest.raises(InvalidFastaError, match="No se pudo parsear"):
+    with pytest.raises(InvalidFastaError, match="Could not parse"):
         validate_fasta_file(fixtures_dir / "not_fasta.fa")
 
 
 def test_empty_sequence(fixtures_dir: Path) -> None:
-    with pytest.raises(InvalidFastaError, match="vacía"):
+    with pytest.raises(InvalidFastaError, match="empty"):
         validate_fasta_file(fixtures_dir / "empty_seq.fa")
 
 
 def test_invalid_characters(fixtures_dir: Path) -> None:
-    with pytest.raises(InvalidFastaError, match="caracteres no válidos"):
+    with pytest.raises(InvalidFastaError, match="invalid characters"):
         validate_fasta_file(fixtures_dir / "invalid_chars.fa")

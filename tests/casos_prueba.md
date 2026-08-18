@@ -574,3 +574,234 @@ fields, including `sseqid`, must remain empty.
 
 The `database` column must preserve the identifier of the database
 against which the search was performed.
+
+---
+
+## CP-13 - Ejecución BLAST proteína contra proteína / Protein vs Protein BLAST Execution
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`run_blast()`
+
+`select_blast_program()`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe como query un archivo FASTA de proteínas y utiliza
+otro archivo FASTA de proteínas como base de datos.
+
+Para esta combinación, el programa BLAST seleccionado debe ser `blastp`.
+
+**EN:**
+The tool receives a protein FASTA file as the query and another protein
+FASTA file as the database.
+
+For this combination, the selected BLAST program must be `blastp`.
+
+### Entrada / Input
+
+Query:
+
+`biocol/tests/fixtures/protein.fa`
+
+Base de datos / Database:
+
+`biocol/tests/fixtures/protein.fa`
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La ejecución debe completarse correctamente y devolver una tabla con las
+12 columnas estándar de BLAST `outfmt 6` más la columna `database`.
+
+La columna `database` debe identificar la base de datos utilizada.
+
+Para el fixture actual se espera al menos un hit de `prot1` contra
+`prot1`.
+
+**EN:**
+Execution must complete successfully and return a table containing the
+12 standard BLAST `outfmt 6` columns plus the `database` column.
+
+The `database` column must identify the database used.
+
+For the current fixture, at least one `prot1` versus `prot1` hit is
+expected.
+
+---
+
+## CP-14 - Carpeta con múltiples bases FASTA / Directory with Multiple FASTA Databases
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`run_blast()`
+
+`list_blast_databases()`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe como base de datos una carpeta que contiene
+múltiples archivos FASTA del mismo tipo.
+
+Cada archivo FASTA debe procesarse como una base independiente.
+
+**EN:**
+The tool receives a directory containing multiple FASTA files of the
+same type as the database source.
+
+Each FASTA file must be processed as an independent database.
+
+### Entrada / Input
+
+Query:
+
+`biocol/tests/fixtures/protein.fa`
+
+Directorio de bases / Database directory:
+
+Una carpeta temporal con:
+
+- `base1.fa`
+- `base2.fa`
+
+Ambos archivos contienen secuencias proteicas.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La herramienta debe ejecutar un análisis BLAST independiente por cada
+archivo FASTA de la carpeta.
+
+El resultado combinado debe incluir una columna `database` que permita
+identificar a qué archivo de base corresponde cada fila.
+
+Para esta prueba deben aparecer las bases:
+
+- `base1`
+- `base2`
+
+**EN:**
+The tool must execute an independent BLAST analysis for each FASTA file
+in the directory.
+
+The combined result must include a `database` column identifying which
+database file produced each row.
+
+For this test, the following databases must appear:
+
+- `base1`
+- `base2`
+
+---
+
+## CP-15 - Parámetros personalizados de BLAST / Custom BLAST Parameters
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`run_blast()`
+
+`build_blast_command()`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta ejecuta BLAST utilizando valores personalizados para
+los parámetros `evalue` y `max_target_seqs`.
+
+Para esta prueba se utilizan:
+
+- `evalue = 1e-20`
+- `max_target_seqs = 10`
+
+**EN:**
+The tool executes BLAST using custom values for the `evalue` and
+`max_target_seqs` parameters.
+
+For this test, the following values are used:
+
+- `evalue = 1e-20`
+- `max_target_seqs = 10`
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La ejecución debe completarse correctamente y los valores proporcionados
+deben incluirse en el comando enviado a BLAST.
+
+El comando debe contener:
+
+    -evalue 1e-20
+    -max_target_seqs 10
+
+El valor de la columna `evalue` en los resultados corresponde al valor
+estadístico calculado para cada hit y no necesariamente coincide con el
+umbral proporcionado por el usuario.
+
+**EN:**
+Execution must complete successfully and the provided values must be
+included in the command sent to BLAST.
+
+The command must contain:
+
+    -evalue 1e-20
+    -max_target_seqs 10
+
+The value stored in the result `evalue` column corresponds to the
+statistical value calculated for each hit and does not necessarily match
+the threshold provided by the user.
+
+---
+
+## CP-16 - Ejecutable BLAST no disponible / BLAST Executable Not Available
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`run_blast()`
+
+`_run_command()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_runner.py::test_run_blast_requires_executable`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta intenta ejecutar un análisis BLAST, pero el ejecutable
+requerido no se encuentra disponible en el `PATH` del sistema.
+
+**EN:**
+The tool attempts to execute a BLAST analysis, but the required
+executable is not available in the system `PATH`.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El backend debe detectar que el ejecutable requerido no está disponible
+y generar una excepción `BlastExecutionError`.
+
+El análisis BLAST no debe continuar ni producir resultados parciales.
+
+**EN:**
+The backend must detect that the required executable is not available
+and raise a `BlastExecutionError`.
+
+The BLAST analysis must not continue or produce partial results.

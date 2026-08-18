@@ -14,9 +14,13 @@ from biocol.exceptions import (
     EmptyFastaError,
     FastaError,
     InvalidFastaError,
+    MetadataError,
     MixedDatabaseTypeError,
     MixedSequenceTypeError,
 )
+from biocol.metadata import load_accessions, normalize_accession
+from biocol.output import DEFAULT_OUTPUT, write_results_csv
+from biocol.processing import QUERY_COLUMNS, build_result_table
 from biocol.sequence import (
     detect_query_type,
     detect_sequence_type,
@@ -27,19 +31,26 @@ from biocol.sequence import (
 __all__ = [
     "BlastError",
     "BlastExecutionError",
+    "DEFAULT_OUTPUT",
     "DatabaseError",
     "EmptyFastaError",
     "FastaError",
     "InvalidFastaError",
+    "MetadataError",
     "MixedDatabaseTypeError",
     "MixedSequenceTypeError",
+    "QUERY_COLUMNS",
+    "build_result_table",
     "detect_database_type",
     "detect_query_type",
     "detect_sequence_type",
     "list_blast_databases",
+    "load_accessions",
+    "normalize_accession",
     "parse_blast_results",
     "read_fasta",
     "run_blast",
     "select_blast_program",
     "validate_fasta_file",
+    "write_results_csv",
 ]

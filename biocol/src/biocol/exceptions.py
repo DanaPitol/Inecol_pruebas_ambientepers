@@ -28,3 +28,7 @@ class MixedDatabaseTypeError(DatabaseError):
 
 class BlastExecutionError(BlastError):
     """Falló makeblastdb o la ejecución de BLAST+."""
+
+
+class MetadataError(ValueError):
+    """El archivo de accesiones/descriptores no es válido."""

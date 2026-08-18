@@ -3,10 +3,13 @@
 from biocol.blast import (
     detect_database_type,
     list_blast_databases,
+    parse_blast_results,
+    run_blast,
     select_blast_program,
 )
 from biocol.exceptions import (
     BlastError,
+    BlastExecutionError,
     DatabaseError,
     EmptyFastaError,
     FastaError,
@@ -23,6 +26,7 @@ from biocol.sequence import (
 
 __all__ = [
     "BlastError",
+    "BlastExecutionError",
     "DatabaseError",
     "EmptyFastaError",
     "FastaError",
@@ -33,7 +37,9 @@ __all__ = [
     "detect_query_type",
     "detect_sequence_type",
     "list_blast_databases",
+    "parse_blast_results",
     "read_fasta",
+    "run_blast",
     "select_blast_program",
     "validate_fasta_file",
 ]

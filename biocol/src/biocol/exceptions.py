@@ -24,3 +24,7 @@ class DatabaseError(BlastError):
 
 class MixedDatabaseTypeError(DatabaseError):
     """Una carpeta o lista mezcla bases nucleotídicas y proteicas."""
+
+
+class BlastExecutionError(BlastError):
+    """Falló makeblastdb o la ejecución de BLAST+."""

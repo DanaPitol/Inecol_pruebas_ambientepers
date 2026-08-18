@@ -805,3 +805,437 @@ The backend must detect that the required executable is not available
 and raise a `BlastExecutionError`.
 
 The BLAST analysis must not continue or produce partial results.
+
+---
+
+## CP-17 - Normalización de accesiones / Accession Normalization
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`normalize_accession()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_normalize_accession_strips_ref_prefix`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe identificadores de accesión provenientes de
+diferentes formatos de bases de datos.
+
+Los identificadores pueden contener prefijos y separadores mediante
+el carácter `|`.
+
+Ejemplos:
+
+- `ref|XP_001.1|`
+- `XP_001`
+- `sp|P12345|`
+
+**EN:**
+The tool receives accession identifiers from different database
+formats.
+
+Identifiers may contain prefixes and separators using the `|`
+character.
+
+Examples:
+
+- `ref|XP_001.1|`
+- `XP_001`
+- `sp|P12345|`
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La función debe eliminar los prefijos y separadores asociados a la
+base de datos y conservar únicamente el identificador de accesión.
+
+Resultados esperados:
+
+- `ref|XP_001.1|` → `XP_001.1`
+- `XP_001` → `XP_001`
+- `sp|P12345|` → `P12345`
+
+La versión de la accesión, cuando exista, debe conservarse.
+
+**EN:**
+The function must remove database prefixes and separators while
+preserving only the accession identifier.
+
+Expected results:
+
+- `ref|XP_001.1|` → `XP_001.1`
+- `XP_001` → `XP_001`
+- `sp|P12345|` → `P12345`
+
+The accession version, when present, must be preserved.
+
+---
+
+## CP-18 - Carga de accesiones y descriptores / Accession and Descriptor Loading
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`load_accessions()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_load_accessions`
+
+### Entrada / Input
+
+`biocol/tests/fixtures/accessions.txt`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe un archivo de metadatos en formato tabular con
+dos campos por fila:
+
+    accession<TAB>description
+
+Cada accession debe relacionarse con su descriptor correspondiente.
+
+**EN:**
+The tool receives a tabular metadata file containing two fields per row:
+
+    accession<TAB>description
+
+Each accession must be associated with its corresponding descriptor.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+`load_accessions()` debe leer correctamente el archivo y devolver una
+tabla que contenga las columnas:
+
+- `accession`
+- `description`
+- `accession_norm`
+
+La columna `accession_norm` debe contener la versión normalizada del
+identificador para facilitar la asociación con los hits de BLAST.
+
+Para el fixture actual deben cargarse tres registros.
+
+**EN:**
+`load_accessions()` must correctly read the file and return a table
+containing the following columns:
+
+- `accession`
+- `description`
+- `accession_norm`
+
+The `accession_norm` column must contain the normalized identifier to
+facilitate matching with BLAST hits.
+
+For the current fixture, three records must be loaded.
+
+---
+
+## CP-19 - Archivo de accesiones vacío / Empty Accessions File
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`load_accessions()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_load_accessions_empty_raises`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe un archivo destinado a contener accesiones y
+descriptores, pero el archivo se encuentra vacío.
+
+**EN:**
+The tool receives a file intended to contain accessions and
+descriptors, but the file is empty.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+`load_accessions()` debe detectar que el archivo no contiene registros
+válidos y generar una excepción `MetadataError`.
+
+El procesamiento de la tabla final no debe continuar utilizando un
+archivo de metadatos vacío.
+
+**EN:**
+`load_accessions()` must detect that the file does not contain valid
+records and raise a `MetadataError`.
+
+Final table processing must not continue using an empty metadata file.
+
+---
+
+## CP-20 - Construcción de tabla final de resultados / Final Results Table Construction
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`build_result_table()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_wide_table_all_hits_and_descriptions`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe resultados BLAST correspondientes a una query
+contra múltiples bases de datos, junto con un archivo de accesiones y
+descriptores.
+
+Los hits deben organizarse en una tabla ancha, utilizando un bloque de
+columnas independiente para cada base de datos.
+
+**EN:**
+The tool receives BLAST results for a query against multiple databases,
+together with an accession and descriptor file.
+
+Hits must be organized into a wide table using an independent column
+block for each database.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La tabla final debe conservar la información de la query e incluir un
+bloque de resultados por cada base de datos.
+
+Para una query nucleotídica deben completarse `length_nt` y
+`cdna_sequence`, mientras que los campos correspondientes a proteína
+deben permanecer vacíos.
+
+Cada bloque de base de datos debe incluir:
+
+- accession
+- description
+- identity percentage
+- alignment length
+- evalue
+- score
+
+Todos los hits deben conservarse por rango. Si una base no presenta un
+hit para determinado rango, los campos de accession y description deben
+representarse mediante `---` y los valores numéricos deben permanecer
+vacíos.
+
+**EN:**
+The final table must preserve query information and include one result
+block for each database.
+
+For a nucleotide query, `length_nt` and `cdna_sequence` must be filled,
+while protein-related fields must remain empty.
+
+Each database block must include:
+
+- accession
+- description
+- identity percentage
+- alignment length
+- evalue
+- score
+
+All hits must be preserved by rank. If a database has no hit for a
+given rank, accession and description fields must be represented by
+`---`, while numeric values must remain empty.
+
+---
+
+## CP-21 - Metadatos de query proteica / Protein Query Metadata
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`build_result_table()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_protein_fasta_fills_aa_only`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta construye la tabla final utilizando como query un archivo
+FASTA que contiene secuencias proteicas.
+
+**EN:**
+The tool builds the final results table using a FASTA file containing
+protein sequences as the query.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+Para una query proteica, la tabla final debe completar:
+
+- `gene_id`
+- `length_aa`
+- `protein_sequence`
+
+Los campos nucleotídicos:
+
+- `length_nt`
+- `cdna_sequence`
+
+deben permanecer vacíos.
+
+Para el fixture `protein.fa`, la longitud esperada de `prot1` es de
+60 aminoácidos.
+
+**EN:**
+For a protein query, the final table must populate:
+
+- `gene_id`
+- `length_aa`
+- `protein_sequence`
+
+The nucleotide-related fields:
+
+- `length_nt`
+- `cdna_sequence`
+
+must remain empty.
+
+For the `protein.fa` fixture, the expected length of `prot1` is
+60 amino acids.
+
+---
+
+## CP-22 - Construcción de tabla sin FASTA de query / Result Table Without Query FASTA
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`build_result_table()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_camino_2_without_fasta`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta construye la tabla final a partir de resultados BLAST
+tabulares existentes, pero no recibe el archivo FASTA original de la
+query.
+
+**EN:**
+The tool builds the final results table from existing tabular BLAST
+results, but the original query FASTA file is not provided.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La tabla debe conservar el identificador de la query mediante
+`gene_id`.
+
+Los campos asociados a la secuencia original:
+
+- `length_nt`
+- `cdna_sequence`
+- `length_aa`
+- `protein_sequence`
+
+deben permanecer vacíos, ya que no existe un archivo FASTA del cual
+recuperar esa información.
+
+Los datos correspondientes a los hits BLAST, accesiones y descriptores
+deben conservarse normalmente.
+
+**EN:**
+The table must preserve the query identifier through `gene_id`.
+
+The fields associated with the original sequence:
+
+- `length_nt`
+- `cdna_sequence`
+- `length_aa`
+- `protein_sequence`
+
+must remain empty because no FASTA file is available from which to
+retrieve that information.
+
+BLAST hit data, accessions, and descriptors must still be preserved.
+
+---
+
+## CP-23 - Escritura del CSV final / Final CSV Writing
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`write_results_csv()`
+
+`build_result_table()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_result_table.py::test_write_results_csv_default_name`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe una tabla final de resultados previamente
+construida y debe escribirla en un archivo CSV.
+
+Si el usuario no proporciona un nombre de salida, la función debe
+utilizar `results.csv` como nombre predeterminado.
+
+**EN:**
+The tool receives a previously constructed final results table and must
+write it to a CSV file.
+
+If the user does not provide an output name, the function must use
+`results.csv` as the default filename.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+`write_results_csv()` debe crear correctamente el archivo CSV sin
+incluir el índice interno de la tabla.
+
+El archivo debe conservar los encabezados y valores de la tabla final,
+incluyendo la información de la query y los bloques correspondientes
+a las bases de datos.
+
+Cuando no se especifique una ruta de salida, el archivo generado debe
+llamarse `results.csv`.
+
+**EN:**
+`write_results_csv()` must correctly create the CSV file without
+including the table's internal index.
+
+The file must preserve the headers and values of the final table,
+including query information and the blocks corresponding to the
+databases.
+
+When no output path is specified, the generated file must be named
+`results.csv`.

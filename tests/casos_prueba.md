@@ -445,3 +445,79 @@ The backend must detect that the provided file does not correspond to a
 valid FASTA database and raise a `DatabaseError`.
 
 No BLAST program should be selected or executed.
+
+---
+
+## CP-11 - Parseo de salida BLAST outfmt 6 / BLAST outfmt 6 Parsing
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`parse_blast_results()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_parser.py::test_parse_outfmt6`
+
+### Entrada / Input
+
+`biocol/tests/fixtures/blast_outfmt6.txt`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe un archivo de resultados BLAST generado en formato
+tabular `outfmt 6`.
+
+El archivo contiene las 12 columnas estándar de BLAST:
+
+1. `qseqid`
+2. `sseqid`
+3. `pident`
+4. `length`
+5. `mismatch`
+6. `gapopen`
+7. `qstart`
+8. `qend`
+9. `sstart`
+10. `send`
+11. `evalue`
+12. `bitscore`
+
+**EN:**
+The tool receives a BLAST results file generated in tabular
+`outfmt 6` format.
+
+The file contains the 12 standard BLAST columns:
+
+1. `qseqid`
+2. `sseqid`
+3. `pident`
+4. `length`
+5. `mismatch`
+6. `gapopen`
+7. `qstart`
+8. `qend`
+9. `sstart`
+10. `send`
+11. `evalue`
+12. `bitscore`
+
+### Resultado esperado / Expected Result
+
+**ES:**
+`parse_blast_results()` debe leer correctamente el archivo y devolver
+una tabla con las 12 columnas estándar de `outfmt 6`.
+
+Cada alineamiento debe conservarse como una fila independiente y los
+valores deben asociarse con la columna correspondiente.
+
+**EN:**
+`parse_blast_results()` must correctly read the file and return a table
+containing the 12 standard `outfmt 6` columns.
+
+Each alignment must be preserved as an independent row and its values
+must be associated with the corresponding column.

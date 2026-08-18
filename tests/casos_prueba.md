@@ -521,3 +521,56 @@ containing the 12 standard `outfmt 6` columns.
 
 Each alignment must be preserved as an independent row and its values
 must be associated with the corresponding column.
+
+---
+
+## CP-12 - Query sin resultados BLAST / Query Without BLAST Hits
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`parse_blast_results()`
+
+`fill_missing_hits()`
+
+### Prueba automatizada relacionada / Related Automated Test
+
+`biocol/tests/test_blast_parser.py::test_fill_missing_hits_adds_empty_row`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta procesa resultados BLAST correspondientes a varias
+secuencias de consulta. Al menos una de las queries no presenta ningún
+hit en la base de datos analizada.
+
+**EN:**
+The tool processes BLAST results corresponding to multiple query
+sequences. At least one query does not produce any hit in the analyzed
+database.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La query sin hit debe conservarse en la tabla de resultados mediante
+una fila propia.
+
+El campo `qseqid` debe contener el identificador de la query, mientras
+que los campos correspondientes al alineamiento, incluyendo `sseqid`,
+deben permanecer vacíos.
+
+La columna `database` debe conservar el identificador de la base de
+datos contra la cual se realizó la búsqueda.
+
+**EN:**
+The query without a hit must be preserved in the results table as its
+own row.
+
+The `qseqid` field must contain the query identifier, while alignment
+fields, including `sseqid`, must remain empty.
+
+The `database` column must preserve the identifier of the database
+against which the search was performed.

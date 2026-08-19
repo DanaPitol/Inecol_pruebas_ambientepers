@@ -1,149 +1,177 @@
 # Casos de prueba HU-01 / HU-01 Test Cases
 
-Este documento contiene los casos de prueba definidos para validar
-el comportamiento de la herramienta durante el desarrollo de HU-01.
+Este documento contiene los casos de prueba definidos para validar el
+comportamiento de la herramienta desarrollada durante HU-01.
+
+Los casos incluyen pruebas unitarias, pruebas de integración y pruebas
+manuales de la interfaz de línea de comandos (CLI).
 
 This document contains the test cases defined to validate the behavior
-of the tool during the development of HU-01.
+of the tool developed during HU-01.
+
+The test cases include unit tests, integration tests, and manual tests
+of the command-line interface (CLI).
 
 ---
 
 ## CP-01 - FASTA válido / Valid FASTA
 
-### Entrada / Input
+### Estado / Status
 
-`tests/data/fasta_valido.faa`
+✅ Cubierto / Covered
 
 ### Función evaluada / Function Under Test
 
 `validate_fasta_file()`
 
-### Prueba automatizada / Automated Test
+### Condición de prueba / Test Condition
 
-`biocol/tests/test_fasta_validator.py::test_existing_valid_fasta`
+**ES:**
+La herramienta recibe un archivo que cumple correctamente con el
+formato FASTA.
 
-### Estado / Status
-
-✅ Aprobado / Passed
+**EN:**
+The tool receives a file that correctly follows the FASTA format.
 
 ### Resultado esperado / Expected Result
 
-**ES:**  
-El sistema debe reconocer un registro FASTA válido y continuar
-con el procesamiento.
+**ES:**
+El archivo debe ser reconocido como un FASTA válido y el procesamiento
+debe continuar normalmente.
 
-**EN:**  
-The system must recognize a valid FASTA record and continue
-processing.
+**EN:**
+The file must be recognized as a valid FASTA file and processing must
+continue normally.
 
 ---
 
 ## CP-02 - multiFASTA con secuencia multilínea / Multi-line multiFASTA
 
-### Entrada / Input
+### Estado / Status
 
-`tests/data/multifasta_multilinea.faa`
+✅ Cubierto / Covered
 
 ### Función evaluada / Function Under Test
 
 `read_fasta()`
 
-### Prueba automatizada / Automated Test
+### Condición de prueba / Test Condition
 
-`biocol/tests/test_multifasta_multilinea.py::test_read_multiline_multifasta`
+**ES:**
+La herramienta recibe un archivo multiFASTA que contiene varias
+secuencias y al menos una de ellas está dividida en múltiples líneas.
 
-### Estado / Status
-
-✅ Aprobado / Passed
+**EN:**
+The tool receives a multiFASTA file containing multiple sequences,
+with at least one sequence split across multiple lines.
 
 ### Resultado esperado / Expected Result
 
-**ES:**  
-El sistema debe reconocer dos secuencias. La secuencia de `seq1`
-debe interpretarse como una sola secuencia aunque esté dividida
-en varias líneas.
+**ES:**
+Cada registro debe identificarse correctamente y las líneas que
+pertenecen a una misma secuencia deben concatenarse.
 
-**EN:**  
-The system must recognize two sequences. The `seq1` sequence
-must be interpreted as a single sequence even when it is split
-across multiple lines.
+**EN:**
+Each record must be correctly identified and lines belonging to the
+same sequence must be concatenated.
 
 ---
 
 ## CP-03 - Archivo FASTA vacío / Empty FASTA File
 
-### Entrada / Input
+### Estado / Status
 
-`tests/data/fasta_vacio.faa`
+✅ Cubierto / Covered
 
 ### Función evaluada / Function Under Test
 
 `validate_fasta_file()`
 
-### Prueba automatizada / Automated Test
+### Condición de prueba / Test Condition
 
-`biocol/tests/test_fasta_validator.py::test_empty_fasta`
+**ES:**
+La herramienta recibe un archivo FASTA vacío.
 
-### Estado / Status
-
-✅ Aprobado / Passed
+**EN:**
+The tool receives an empty FASTA file.
 
 ### Resultado esperado / Expected Result
 
-**ES:**  
-El sistema debe rechazar el archivo vacío, mostrar un mensaje
-de error mediante STDERR y finalizar con código de salida 1.
+**ES:**
+El archivo debe rechazarse y el procesamiento no debe continuar.
 
-**EN:**  
-The system must reject the empty file, display an error message
-through STDERR, and terminate with exit code 1.
+**EN:**
+The file must be rejected and processing must not continue.
 
 ---
 
 ## CP-04 - Formato FASTA incorrecto / Invalid FASTA Format
 
-### Entrada / Input
+### Estado / Status
 
-`tests/data/fasta_invalido.faa`
+✅ Cubierto / Covered
 
-### Función evaluada / Function Under Test
+### Funciones evaluadas / Functions Under Test
 
 `validate_fasta_file()`
 
-### Prueba automatizada / Automated Test
-
-`biocol/tests/test_fasta_invalido.py::test_invalid_fasta_format`
-
-### Estado / Status
-
-✅ Aprobado / Passed
+`read_fasta()`
 
 ### Condición de prueba / Test Condition
 
-**ES:**  
-El archivo contiene una secuencia, pero el identificador no comienza
-con el símbolo `>` requerido por el formato FASTA.
+**ES:**
+La herramienta recibe un archivo que no cumple con la estructura
+esperada de un FASTA válido.
 
-**EN:**  
-The file contains a sequence, but the identifier does not begin
-with the `>` symbol required by the FASTA format.
+**EN:**
+The tool receives a file that does not follow the expected structure
+of a valid FASTA file.
 
 ### Resultado esperado / Expected Result
 
-**ES:**  
-El sistema debe detectar que el archivo no cumple con el formato
-FASTA esperado, mostrar un mensaje de error mediante STDERR y
-finalizar con código de salida 1. El procesamiento de BLAST no
-debe comenzar.
+**ES:**
+El sistema debe detectar el formato incorrecto, rechazar el archivo y
+evitar que el procesamiento continúe.
 
-**EN:**  
-The system must detect that the file does not comply with the
-expected FASTA format, display an error message through STDERR,
-and terminate with exit code 1. BLAST processing must not start.
+**EN:**
+The system must detect the invalid format, reject the file, and prevent
+further processing.
 
 ---
 
-## CP-05 - Selección de BLAST según tipo de secuencia / BLAST Selection by Sequence Type
+## CP-05 - Encabezado FASTA con descriptor / FASTA Header with Descriptor
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Función evaluada / Function Under Test
+
+`read_fasta()`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El encabezado de una secuencia FASTA contiene un identificador seguido
+de información descriptiva adicional.
+
+**EN:**
+A FASTA sequence header contains an identifier followed by additional
+descriptive information.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La herramienta debe reconocer correctamente el identificador de la
+secuencia sin que la presencia del descriptor invalide el registro.
+
+**EN:**
+The tool must correctly recognize the sequence identifier without the
+descriptor invalidating the record.
+
+---
+
+## CP-06 - Detección del tipo de secuencia / Sequence Type Detection
 
 ### Estado / Status
 
@@ -155,162 +183,71 @@ and terminate with exit code 1. BLAST processing must not start.
 
 `detect_database_type()`
 
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe secuencias nucleotídicas o proteicas tanto en la
+query como en las bases de datos.
+
+**EN:**
+The tool receives nucleotide or protein sequences in both the query and
+the databases.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La herramienta debe clasificar correctamente las secuencias como
+`nucleotide` o `protein`.
+
+**EN:**
+The tool must correctly classify sequences as `nucleotide` or
+`protein`.
+
+---
+
+## CP-07 - Selección automática del programa BLAST / Automatic BLAST Program Selection
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Función evaluada / Function Under Test
+
 `select_blast_program()`
 
-### Pruebas automatizadas relacionadas / Related Automated Tests
-
-`biocol/tests/test_detect_sequence_type.py`
-
-`biocol/tests/test_blast_selection.py`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe una query y una base de datos FASTA. Ambas son
-clasificadas como `nucleotide` o `protein`.
-
-La combinación de ambos tipos determina qué programa BLAST debe
-seleccionarse.
+Una vez identificado el tipo de la query y de la base de datos, la
+herramienta debe determinar automáticamente qué programa BLAST utilizar.
 
 **EN:**
-The tool receives a query and a FASTA database. Both are classified as
-`nucleotide` or `protein`.
-
-The combination of both types determines which BLAST program must be
-selected.
+Once the query and database types have been identified, the tool must
+automatically determine which BLAST program to use.
 
 ### Resultado esperado / Expected Result
 
-| Query | Base de datos / Database | Opción traducida / Translated | Programa esperado / Expected Program |
-|---|---|---|---|
-| `nucleotide` | `nucleotide` | `False` | `blastn` |
-| `nucleotide` | `nucleotide` | `True` | `tblastx` |
-| `nucleotide` | `protein` | se ignora / ignored | `blastx` |
-| `protein` | `protein` | se ignora / ignored | `blastp` |
-| `protein` | `nucleotide` | se ignora / ignored | `tblastn` |
+| Query | Base / Database | Programa / Program |
+|---|---|---|
+| nucleotide | nucleotide | `blastn` |
+| nucleotide | nucleotide con `--tblastx` | `tblastx` |
+| nucleotide | protein | `blastx` |
+| protein | protein | `blastp` |
+| protein | nucleotide | `tblastn` |
 
 **ES:**
-La selección del programa debe realizarse correctamente sin que el
-usuario tenga que indicar manualmente el tipo de BLAST, excepto cuando
-quiera utilizar `tblastx` para una comparación nucleótido contra
-nucleótido.
+El usuario no debe tener que seleccionar manualmente el programa BLAST,
+excepto para solicitar explícitamente `tblastx` en una comparación
+nucleótido contra nucleótido.
 
 **EN:**
-The BLAST program must be selected correctly without requiring the
-user to manually specify the BLAST type, except when `tblastx` is
-explicitly requested for a nucleotide-versus-nucleotide comparison.
-
-------
-
-## CP-06 - Base de datos inexistente / Missing Database
-
-### Estado / Status
-
-🟡 Parcialmente cubierto / Partially covered
-
-### Funciones evaluadas / Functions Under Test
-
-`detect_database_type()`
-
-`list_blast_databases()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_selection.py::test_unknown_source_raises`
-
-**ES:**
-La validación de la existencia de la base de datos ya está implementada
-en el backend. Cuando la ruta proporcionada no corresponde a un archivo
-FASTA ni a una carpeta existente con archivos FASTA, el backend genera
-una excepción `DatabaseError`.
-
-El manejo de esta excepción desde la interfaz de línea de comandos,
-incluyendo la salida mediante STDERR y el código de salida 1, todavía
-depende de la implementación del CLI.
-
-**EN:**
-Database existence validation is already implemented in the backend.
-When the provided path does not correspond to a FASTA file or an
-existing directory containing FASTA files, the backend raises a
-`DatabaseError`.
-
-Handling this exception from the command-line interface, including
-STDERR output and exit code 1, still depends on the CLI implementation.
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El usuario proporciona una ruta hacia una base de datos que no existe.
-
-**EN:**
-The user provides a path to a database that does not exist.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-El backend debe detectar que la base de datos no existe y generar una
-excepción `DatabaseError`.
-
-Una vez integrada la interfaz de línea de comandos, el sistema deberá
-mostrar el mensaje correspondiente mediante STDERR, finalizar con
-código de salida 1 y no iniciar BLAST.
-
-**EN:**
-The backend must detect that the database does not exist and raise a
-`DatabaseError`.
-
-Once the command-line interface is integrated, the system must display
-the corresponding message through STDERR, terminate with exit code 1,
-and not start BLAST.
----
-
-## CP-07 - Encabezado FASTA con descriptor / FASTA Header with Descriptor
-
-### Entrada / Input
-
-`biocol/tests/fixtures/protein_with_descriptor.fa`
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`read_fasta()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_fasta_descriptor.py::test_fasta_header_with_descriptor`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El archivo FASTA contiene un encabezado formado por un identificador
-seguido de un descriptor con información adicional sobre la secuencia.
-
-Ejemplo:
-
-    >XP_002862155.2 protochlorophyllide reductase A, chloroplastic [Arabidopsis lyrata subsp. lyrata]
-
-**EN:**
-The FASTA file contains a header consisting of an identifier followed
-by a descriptor with additional information about the sequence.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-El sistema debe reconocer correctamente el archivo FASTA, interpretar
-`XP_002862155.2` como el identificador de la secuencia y conservar el
-encabezado completo como descripción.
-
-**EN:**
-The system must correctly recognize the FASTA file, interpret
-`XP_002862155.2` as the sequence identifier, and preserve the complete
-header as the description.
+The user must not need to manually select the BLAST program, except
+when explicitly requesting `tblastx` for a nucleotide-versus-nucleotide
+comparison.
 
 ---
 
-## CP-08 - Bases de datos con tipos mezclados / Mixed Database Types
+## CP-08 - Base de datos inexistente o inválida / Missing or Invalid Database
 
 ### Estado / Status
 
@@ -322,40 +259,37 @@ header as the description.
 
 `list_blast_databases()`
 
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_selection.py::test_folder_mixed_types_raises`
+`biocol run`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe una carpeta que contiene al menos un archivo
-FASTA con secuencias nucleotídicas y otro archivo FASTA con secuencias
-proteicas.
+La ruta proporcionada como base de datos no existe o corresponde a un
+archivo que no puede utilizarse como FASTA.
 
 **EN:**
-The tool receives a directory containing at least one FASTA file with
-nucleotide sequences and another FASTA file with protein sequences.
+The path provided as the database does not exist or corresponds to a
+file that cannot be used as a FASTA database.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El backend debe detectar que la carpeta contiene bases de datos de tipos
-diferentes y generar una excepción `MixedDatabaseTypeError`.
+El backend debe rechazar la base de datos y la CLI debe informar el
+error sin iniciar BLAST.
 
-No debe seleccionarse ningún programa BLAST mientras la entrada de bases
-de datos no sea homogénea.
+Cuando el error ocurre mediante la CLI, la ejecución debe finalizar con
+un código de salida distinto de `0`.
 
 **EN:**
-The backend must detect that the directory contains databases of
-different types and raise a `MixedDatabaseTypeError`.
+The backend must reject the database and the CLI must report the error
+without starting BLAST.
 
-No BLAST program should be selected while the database input is not
-homogeneous.
+When the error occurs through the CLI, execution must terminate with a
+non-zero exit code.
 
 ---
 
-## CP-09 - Carpeta de base de datos vacía / Empty Database Directory
+## CP-09 - Carpeta de bases FASTA vacía / Empty FASTA Database Directory
 
 ### Estado / Status
 
@@ -367,38 +301,29 @@ homogeneous.
 
 `list_blast_databases()`
 
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_selection.py::test_empty_folder_raises`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe como base de datos una ruta hacia una carpeta
-existente que no contiene archivos FASTA compatibles.
+La herramienta recibe una carpeta existente que no contiene archivos
+FASTA compatibles.
 
 **EN:**
-The tool receives an existing directory as the database source, but
-the directory does not contain compatible FASTA files.
+The tool receives an existing directory that contains no compatible
+FASTA files.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El backend debe detectar que la carpeta no contiene archivos FASTA
-que puedan utilizarse como base de datos y generar una excepción
-`DatabaseError`.
-
-No debe seleccionarse ni ejecutarse ningún programa BLAST.
+La herramienta debe rechazar la carpeta y no debe seleccionar ni
+ejecutar ningún programa BLAST.
 
 **EN:**
-The backend must detect that the directory does not contain FASTA
-files that can be used as a database and raise a `DatabaseError`.
-
-No BLAST program should be selected or executed.
+The tool must reject the directory and must not select or execute any
+BLAST program.
 
 ---
 
-## CP-10 - Archivo de base de datos no FASTA / Non-FASTA Database File
+## CP-10 - Bases de datos con tipos mezclados / Mixed Database Types
 
 ### Estado / Status
 
@@ -410,41 +335,28 @@ No BLAST program should be selected or executed.
 
 `list_blast_databases()`
 
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_selection.py::test_non_fasta_file_raises`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe como base de datos la ruta de un archivo existente
-cuya extensión no corresponde a un formato FASTA soportado.
-
-Por ejemplo:
-
-    database.txt
+Una carpeta de bases contiene archivos FASTA nucleotídicos y proteicos
+al mismo tiempo.
 
 **EN:**
-The tool receives the path of an existing file as the database source,
-but its extension does not correspond to a supported FASTA format.
-
-For example:
-
-    database.txt
+A database directory contains both nucleotide and protein FASTA files.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El backend debe detectar que el archivo proporcionado no corresponde a
-una base de datos FASTA válida y generar una excepción `DatabaseError`.
+La herramienta debe detectar que las bases no son homogéneas y rechazar
+la entrada.
 
-No debe seleccionarse ni ejecutarse ningún programa BLAST.
+No debe ejecutarse BLAST.
 
 **EN:**
-The backend must detect that the provided file does not correspond to a
-valid FASTA database and raise a `DatabaseError`.
+The tool must detect that the databases are not homogeneous and reject
+the input.
 
-No BLAST program should be selected or executed.
+BLAST must not be executed.
 
 ---
 
@@ -454,73 +366,41 @@ No BLAST program should be selected or executed.
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `parse_blast_results()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_parser.py::test_parse_outfmt6`
-
-### Entrada / Input
-
-`biocol/tests/fixtures/blast_outfmt6.txt`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe un archivo de resultados BLAST generado en formato
-tabular `outfmt 6`.
-
-El archivo contiene las 12 columnas estándar de BLAST:
-
-1. `qseqid`
-2. `sseqid`
-3. `pident`
-4. `length`
-5. `mismatch`
-6. `gapopen`
-7. `qstart`
-8. `qend`
-9. `sstart`
-10. `send`
-11. `evalue`
-12. `bitscore`
+La herramienta recibe resultados BLAST en formato tabular estándar
+`outfmt 6`.
 
 **EN:**
-The tool receives a BLAST results file generated in tabular
-`outfmt 6` format.
-
-The file contains the 12 standard BLAST columns:
-
-1. `qseqid`
-2. `sseqid`
-3. `pident`
-4. `length`
-5. `mismatch`
-6. `gapopen`
-7. `qstart`
-8. `qend`
-9. `sstart`
-10. `send`
-11. `evalue`
-12. `bitscore`
+The tool receives BLAST results in standard tabular `outfmt 6` format.
 
 ### Resultado esperado / Expected Result
 
-**ES:**
-`parse_blast_results()` debe leer correctamente el archivo y devolver
-una tabla con las 12 columnas estándar de `outfmt 6`.
+La tabla debe contener correctamente:
 
-Cada alineamiento debe conservarse como una fila independiente y los
-valores deben asociarse con la columna correspondiente.
+1. `qseqid`
+2. `sseqid`
+3. `pident`
+4. `length`
+5. `mismatch`
+6. `gapopen`
+7. `qstart`
+8. `qend`
+9. `sstart`
+10. `send`
+11. `evalue`
+12. `bitscore`
+
+**ES:**
+Cada alineamiento debe conservarse como una fila independiente.
 
 **EN:**
-`parse_blast_results()` must correctly read the file and return a table
-containing the 12 standard `outfmt 6` columns.
-
-Each alignment must be preserved as an independent row and its values
-must be associated with the corresponding column.
+Each alignment must be preserved as an independent row.
 
 ---
 
@@ -536,48 +416,31 @@ must be associated with the corresponding column.
 
 `fill_missing_hits()`
 
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_parser.py::test_fill_missing_hits_adds_empty_row`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta procesa resultados BLAST correspondientes a varias
-secuencias de consulta. Al menos una de las queries no presenta ningún
-hit en la base de datos analizada.
+Una de las secuencias de la query no obtiene ningún hit en una base de
+datos.
 
 **EN:**
-The tool processes BLAST results corresponding to multiple query
-sequences. At least one query does not produce any hit in the analyzed
-database.
+One of the query sequences produces no hit in a database.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La query sin hit debe conservarse en la tabla de resultados mediante
-una fila propia.
+La query debe conservarse en los resultados mediante una fila propia.
 
-El campo `qseqid` debe contener el identificador de la query, mientras
-que los campos correspondientes al alineamiento, incluyendo `sseqid`,
-deben permanecer vacíos.
-
-La columna `database` debe conservar el identificador de la base de
-datos contra la cual se realizó la búsqueda.
+El identificador debe permanecer disponible y los campos del
+alineamiento deben quedar vacíos.
 
 **EN:**
-The query without a hit must be preserved in the results table as its
-own row.
+The query must remain in the results as its own row.
 
-The `qseqid` field must contain the query identifier, while alignment
-fields, including `sseqid`, must remain empty.
-
-The `database` column must preserve the identifier of the database
-against which the search was performed.
+Its identifier must remain available and alignment fields must be empty.
 
 ---
 
-## CP-13 - Ejecución BLAST proteína contra proteína / Protein vs Protein BLAST Execution
+## CP-13 - Ejecución local de BLAST / Local BLAST Execution
 
 ### Estado / Status
 
@@ -587,51 +450,32 @@ against which the search was performed.
 
 `run_blast()`
 
-`select_blast_program()`
+`build_blast_command()`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe como query un archivo FASTA de proteínas y utiliza
-otro archivo FASTA de proteínas como base de datos.
-
-Para esta combinación, el programa BLAST seleccionado debe ser `blastp`.
+La herramienta recibe una query FASTA y una base FASTA compatibles y
+ejecuta BLAST+ instalado localmente.
 
 **EN:**
-The tool receives a protein FASTA file as the query and another protein
-FASTA file as the database.
-
-For this combination, the selected BLAST program must be `blastp`.
-
-### Entrada / Input
-
-Query:
-
-`biocol/tests/fixtures/protein.fa`
-
-Base de datos / Database:
-
-`biocol/tests/fixtures/protein.fa`
+The tool receives compatible query and database FASTA files and runs
+the locally installed BLAST+ program.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La ejecución debe completarse correctamente y devolver una tabla con las
-12 columnas estándar de BLAST `outfmt 6` más la columna `database`.
+Debe construirse y ejecutarse correctamente el comando BLAST
+correspondiente.
 
-La columna `database` debe identificar la base de datos utilizada.
-
-Para el fixture actual se espera al menos un hit de `prot1` contra
-`prot1`.
+Los resultados deben obtenerse en formato `outfmt 6` y procesarse sin
+errores.
 
 **EN:**
-Execution must complete successfully and return a table containing the
-12 standard BLAST `outfmt 6` columns plus the `database` column.
+The corresponding BLAST command must be correctly built and executed.
 
-The `database` column must identify the database used.
-
-For the current fixture, at least one `prot1` versus `prot1` hit is
-expected.
+Results must be obtained in `outfmt 6` format and processed without
+errors.
 
 ---
 
@@ -650,57 +494,26 @@ expected.
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe como base de datos una carpeta que contiene
-múltiples archivos FASTA del mismo tipo.
-
-Cada archivo FASTA debe procesarse como una base independiente.
+La ruta de bases corresponde a una carpeta que contiene múltiples
+archivos FASTA compatibles del mismo tipo.
 
 **EN:**
-The tool receives a directory containing multiple FASTA files of the
-same type as the database source.
-
-Each FASTA file must be processed as an independent database.
-
-### Entrada / Input
-
-Query:
-
-`biocol/tests/fixtures/protein.fa`
-
-Directorio de bases / Database directory:
-
-Una carpeta temporal con:
-
-- `base1.fa`
-- `base2.fa`
-
-Ambos archivos contienen secuencias proteicas.
+The database path corresponds to a directory containing multiple
+compatible FASTA files of the same type.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La herramienta debe ejecutar un análisis BLAST independiente por cada
-archivo FASTA de la carpeta.
+Cada archivo FASTA debe procesarse como una base independiente.
 
-El resultado combinado debe incluir una columna `database` que permita
-identificar a qué archivo de base corresponde cada fila.
-
-Para esta prueba deben aparecer las bases:
-
-- `base1`
-- `base2`
+Los resultados combinados deben conservar un identificador que permita
+saber qué base produjo cada hit.
 
 **EN:**
-The tool must execute an independent BLAST analysis for each FASTA file
-in the directory.
+Each FASTA file must be processed as an independent database.
 
-The combined result must include a `database` column identifying which
-database file produced each row.
-
-For this test, the following databases must appear:
-
-- `base1`
-- `base2`
+Combined results must preserve an identifier indicating which database
+produced each hit.
 
 ---
 
@@ -710,63 +523,44 @@ For this test, the following databases must appear:
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
-
-`run_blast()`
+### Función evaluada / Function Under Test
 
 `build_blast_command()`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta ejecuta BLAST utilizando valores personalizados para
-los parámetros `evalue` y `max_target_seqs`.
+El usuario proporciona valores personalizados para los parámetros de
+ejecución de BLAST.
 
-Para esta prueba se utilizan:
+Entre los parámetros disponibles se encuentran:
 
-- `evalue = 1e-20`
-- `max_target_seqs = 10`
+- `evalue`
+- `max_target_seqs`
+- `threads`
 
 **EN:**
-The tool executes BLAST using custom values for the `evalue` and
-`max_target_seqs` parameters.
+The user provides custom values for BLAST execution parameters.
 
-For this test, the following values are used:
+Available parameters include:
 
-- `evalue = 1e-20`
-- `max_target_seqs = 10`
+- `evalue`
+- `max_target_seqs`
+- `threads`
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La ejecución debe completarse correctamente y los valores proporcionados
-deben incluirse en el comando enviado a BLAST.
-
-El comando debe contener:
-
-    -evalue 1e-20
-    -max_target_seqs 10
-
-El valor de la columna `evalue` en los resultados corresponde al valor
-estadístico calculado para cada hit y no necesariamente coincide con el
-umbral proporcionado por el usuario.
+Los valores proporcionados deben incorporarse correctamente al comando
+BLAST ejecutado.
 
 **EN:**
-Execution must complete successfully and the provided values must be
-included in the command sent to BLAST.
-
-The command must contain:
-
-    -evalue 1e-20
-    -max_target_seqs 10
-
-The value stored in the result `evalue` column corresponds to the
-statistical value calculated for each hit and does not necessarily match
-the threshold provided by the user.
+The provided values must be correctly incorporated into the executed
+BLAST command.
 
 ---
 
-## CP-16 - Ejecutable BLAST no disponible / BLAST Executable Not Available
+## CP-16 - Error durante la ejecución de BLAST / BLAST Execution Error
 
 ### Estado / Status
 
@@ -778,33 +572,42 @@ the threshold provided by the user.
 
 `_run_command()`
 
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_blast_runner.py::test_run_blast_requires_executable`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta intenta ejecutar un análisis BLAST, pero el ejecutable
-requerido no se encuentra disponible en el `PATH` del sistema.
+BLAST+ no puede ejecutarse correctamente, ya sea porque el ejecutable
+requerido no está disponible o porque BLAST rechaza los parámetros
+proporcionados.
+
+También se comprobaron manualmente valores inválidos como:
+
+- `--max-target-seqs 0`
+- `--threads 0`
+- `--evalue 0`
 
 **EN:**
-The tool attempts to execute a BLAST analysis, but the required
-executable is not available in the system `PATH`.
+BLAST+ cannot execute correctly, either because the required executable
+is unavailable or because BLAST rejects the provided parameters.
+
+Invalid values were also manually checked, including:
+
+- `--max-target-seqs 0`
+- `--threads 0`
+- `--evalue 0`
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El backend debe detectar que el ejecutable requerido no está disponible
-y generar una excepción `BlastExecutionError`.
+La herramienta debe detectar el fallo de BLAST, informar el error y no
+continuar como si la ejecución hubiera sido exitosa.
 
-El análisis BLAST no debe continuar ni producir resultados parciales.
+Desde la CLI, el proceso debe finalizar con código de salida `1`.
 
 **EN:**
-The backend must detect that the required executable is not available
-and raise a `BlastExecutionError`.
+The tool must detect the BLAST failure, report the error, and must not
+continue as if execution had succeeded.
 
-The BLAST analysis must not continue or produce partial results.
+From the CLI, the process must terminate with exit code `1`.
 
 ---
 
@@ -814,22 +617,15 @@ The BLAST analysis must not continue or produce partial results.
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `normalize_accession()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_normalize_accession_strips_ref_prefix`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe identificadores de accesión provenientes de
-diferentes formatos de bases de datos.
-
-Los identificadores pueden contener prefijos y separadores mediante
-el carácter `|`.
+La herramienta recibe identificadores de accesión con diferentes
+formatos y prefijos.
 
 Ejemplos:
 
@@ -838,43 +634,20 @@ Ejemplos:
 - `sp|P12345|`
 
 **EN:**
-The tool receives accession identifiers from different database
-formats.
-
-Identifiers may contain prefixes and separators using the `|`
-character.
-
-Examples:
-
-- `ref|XP_001.1|`
-- `XP_001`
-- `sp|P12345|`
+The tool receives accession identifiers using different formats and
+prefixes.
 
 ### Resultado esperado / Expected Result
 
-**ES:**
-La función debe eliminar los prefijos y separadores asociados a la
-base de datos y conservar únicamente el identificador de accesión.
-
-Resultados esperados:
-
 - `ref|XP_001.1|` → `XP_001.1`
 - `XP_001` → `XP_001`
 - `sp|P12345|` → `P12345`
 
-La versión de la accesión, cuando exista, debe conservarse.
+**ES:**
+La versión de la accesión debe conservarse cuando exista.
 
 **EN:**
-The function must remove database prefixes and separators while
-preserving only the accession identifier.
-
-Expected results:
-
-- `ref|XP_001.1|` → `XP_001.1`
-- `XP_001` → `XP_001`
-- `sp|P12345|` → `P12345`
-
-The accession version, when present, must be preserved.
+The accession version must be preserved when present.
 
 ---
 
@@ -884,66 +657,41 @@ The accession version, when present, must be preserved.
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `load_accessions()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_load_accessions`
-
-### Entrada / Input
-
-`biocol/tests/fixtures/accessions.txt`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe un archivo de metadatos en formato tabular con
-dos campos por fila:
+La herramienta recibe un archivo tabulado con la estructura:
 
-    accession<TAB>description
-
-Cada accession debe relacionarse con su descriptor correspondiente.
+`accession<TAB>description`
 
 **EN:**
-The tool receives a tabular metadata file containing two fields per row:
+The tool receives a tab-separated file with the structure:
 
-    accession<TAB>description
-
-Each accession must be associated with its corresponding descriptor.
+`accession<TAB>description`
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-`load_accessions()` debe leer correctamente el archivo y devolver una
-tabla que contenga las columnas:
+La información debe cargarse correctamente y debe poder relacionarse
+con las accesiones encontradas en los resultados BLAST.
 
-- `accession`
-- `description`
-- `accession_norm`
-
-La columna `accession_norm` debe contener la versión normalizada del
-identificador para facilitar la asociación con los hits de BLAST.
-
-Para el fixture actual deben cargarse tres registros.
+La ausencia de una descripción asociada a un hit es válida y puede
+representarse mediante `---`.
 
 **EN:**
-`load_accessions()` must correctly read the file and return a table
-containing the following columns:
+The information must be loaded correctly and must be available for
+matching against accessions found in BLAST results.
 
-- `accession`
-- `description`
-- `accession_norm`
-
-The `accession_norm` column must contain the normalized identifier to
-facilitate matching with BLAST hits.
-
-For the current fixture, three records must be loaded.
+The absence of a description associated with a hit is valid and may be
+represented by `---`.
 
 ---
 
-## CP-19 - Archivo de accesiones vacío / Empty Accessions File
+## CP-19 - Archivo de accesiones vacío o inexistente / Empty or Missing Accessions File
 
 ### Estado / Status
 
@@ -953,79 +701,61 @@ For the current fixture, three records must be loaded.
 
 `load_accessions()`
 
-### Prueba automatizada relacionada / Related Automated Test
+`biocol run`
 
-`biocol/tests/test_result_table.py::test_load_accessions_empty_raises`
+`biocol from-blast`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe un archivo destinado a contener accesiones y
-descriptores, pero el archivo se encuentra vacío.
+El archivo de accesiones está vacío o la ruta proporcionada no existe.
 
 **EN:**
-The tool receives a file intended to contain accessions and
-descriptors, but the file is empty.
+The accessions file is empty or the provided path does not exist.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-`load_accessions()` debe detectar que el archivo no contiene registros
-válidos y generar una excepción `MetadataError`.
+Un archivo vacío debe ser rechazado por el backend.
 
-El procesamiento de la tabla final no debe continuar utilizando un
-archivo de metadatos vacío.
+Una ruta inexistente utilizada mediante la CLI debe generar un mensaje
+de error y finalizar con código de salida `1`.
 
 **EN:**
-`load_accessions()` must detect that the file does not contain valid
-records and raise a `MetadataError`.
+An empty file must be rejected by the backend.
 
-Final table processing must not continue using an empty metadata file.
+A missing path used through the CLI must produce an error message and
+terminate with exit code `1`.
 
 ---
 
-## CP-20 - Construcción de tabla final de resultados / Final Results Table Construction
+## CP-20 - Construcción de tabla final / Final Results Table Construction
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `build_result_table()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_wide_table_all_hits_and_descriptions`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe resultados BLAST correspondientes a una query
-contra múltiples bases de datos, junto con un archivo de accesiones y
-descriptores.
-
-Los hits deben organizarse en una tabla ancha, utilizando un bloque de
-columnas independiente para cada base de datos.
+La herramienta recibe resultados BLAST y debe transformarlos en la tabla
+final utilizada por el usuario.
 
 **EN:**
-The tool receives BLAST results for a query against multiple databases,
-together with an accession and descriptor file.
-
-Hits must be organized into a wide table using an independent column
-block for each database.
+The tool receives BLAST results and must transform them into the final
+table used by the user.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La tabla final debe conservar la información de la query e incluir un
-bloque de resultados por cada base de datos.
+La tabla debe conservar la información de la query e incorporar un
+bloque de resultados por cada base procesada.
 
-Para una query nucleotídica deben completarse `length_nt` y
-`cdna_sequence`, mientras que los campos correspondientes a proteína
-deben permanecer vacíos.
-
-Cada bloque de base de datos debe incluir:
+Cada bloque debe incluir:
 
 - accession
 - description
@@ -1034,19 +764,14 @@ Cada bloque de base de datos debe incluir:
 - evalue
 - score
 
-Todos los hits deben conservarse por rango. Si una base no presenta un
-hit para determinado rango, los campos de accession y description deben
-representarse mediante `---` y los valores numéricos deben permanecer
-vacíos.
+Cuando un valor no esté disponible, debe permanecer vacío o utilizar
+`---` según corresponda.
 
 **EN:**
-The final table must preserve query information and include one result
-block for each database.
+The table must preserve query information and include one result block
+for each processed database.
 
-For a nucleotide query, `length_nt` and `cdna_sequence` must be filled,
-while protein-related fields must remain empty.
-
-Each database block must include:
+Each block must include:
 
 - accession
 - description
@@ -1055,198 +780,113 @@ Each database block must include:
 - evalue
 - score
 
-All hits must be preserved by rank. If a database has no hit for a
-given rank, accession and description fields must be represented by
-`---`, while numeric values must remain empty.
+When a value is unavailable, it must remain empty or use `---` as
+appropriate.
 
 ---
 
-## CP-21 - Metadatos de query proteica / Protein Query Metadata
+## CP-21 - Metadatos de secuencia en la tabla final / Sequence Metadata in Final Table
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `build_result_table()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_protein_fasta_fills_aa_only`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta construye la tabla final utilizando como query un archivo
-FASTA que contiene secuencias proteicas.
-
-**EN:**
-The tool builds the final results table using a FASTA file containing
-protein sequences as the query.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-Para una query proteica, la tabla final debe completar:
-
-- `gene_id`
-- `length_aa`
-- `protein_sequence`
-
-Los campos nucleotídicos:
-
-- `length_nt`
-- `cdna_sequence`
-
-deben permanecer vacíos.
-
-Para el fixture `protein.fa`, la longitud esperada de `prot1` es de
-60 aminoácidos.
-
-**EN:**
-For a protein query, the final table must populate:
-
-- `gene_id`
-- `length_aa`
-- `protein_sequence`
-
-The nucleotide-related fields:
-
-- `length_nt`
-- `cdna_sequence`
-
-must remain empty.
-
-For the `protein.fa` fixture, the expected length of `prot1` is
-60 amino acids.
-
----
-
-## CP-22 - Construcción de tabla sin FASTA de query / Result Table Without Query FASTA
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`build_result_table()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_camino_2_without_fasta`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-La herramienta construye la tabla final a partir de resultados BLAST
-tabulares existentes, pero no recibe el archivo FASTA original de la
+La tabla final se construye utilizando el archivo FASTA original de la
 query.
 
 **EN:**
-The tool builds the final results table from existing tabular BLAST
-results, but the original query FASTA file is not provided.
+The final table is built using the original query FASTA file.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La tabla debe conservar el identificador de la query mediante
-`gene_id`.
+Para una query nucleotídica deben completarse:
 
-Los campos asociados a la secuencia original:
-
+- `gene_id`
 - `length_nt`
 - `cdna_sequence`
+
+y los campos proteicos deben permanecer vacíos.
+
+Para una query proteica deben completarse:
+
+- `gene_id`
 - `length_aa`
 - `protein_sequence`
 
-deben permanecer vacíos, ya que no existe un archivo FASTA del cual
-recuperar esa información.
-
-Los datos correspondientes a los hits BLAST, accesiones y descriptores
-deben conservarse normalmente.
+y los campos nucleotídicos deben permanecer vacíos.
 
 **EN:**
-The table must preserve the query identifier through `gene_id`.
+For a nucleotide query, the following fields must be populated:
 
-The fields associated with the original sequence:
-
+- `gene_id`
 - `length_nt`
 - `cdna_sequence`
+
+while protein fields must remain empty.
+
+For a protein query, the following fields must be populated:
+
+- `gene_id`
 - `length_aa`
 - `protein_sequence`
 
-must remain empty because no FASTA file is available from which to
-retrieve that information.
-
-BLAST hit data, accessions, and descriptors must still be preserved.
+while nucleotide fields must remain empty.
 
 ---
 
-## CP-23 - Escritura del CSV final / Final CSV Writing
+## CP-22 - Escritura del CSV final / Final CSV Writing
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
 
-### Funciones evaluadas / Functions Under Test
+### Función evaluada / Function Under Test
 
 `write_results_csv()`
-
-`build_result_table()`
-
-### Prueba automatizada relacionada / Related Automated Test
-
-`biocol/tests/test_result_table.py::test_write_results_csv_default_name`
 
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe una tabla final de resultados previamente
-construida y debe escribirla en un archivo CSV.
-
-Si el usuario no proporciona un nombre de salida, la función debe
-utilizar `results.csv` como nombre predeterminado.
+La tabla final debe almacenarse como un archivo CSV.
 
 **EN:**
-The tool receives a previously constructed final results table and must
-write it to a CSV file.
-
-If the user does not provide an output name, the function must use
-`results.csv` as the default filename.
+The final results table must be stored as a CSV file.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-`write_results_csv()` debe crear correctamente el archivo CSV sin
-incluir el índice interno de la tabla.
+El archivo debe escribirse correctamente, conservar encabezados y
+valores y no incluir el índice interno del DataFrame.
 
-El archivo debe conservar los encabezados y valores de la tabla final,
-incluyendo la información de la query y los bloques correspondientes
-a las bases de datos.
-
-Cuando no se especifique una ruta de salida, el archivo generado debe
-llamarse `results.csv`.
+Cuando no se proporcione una ruta mediante `--output`, debe utilizarse
+`results.csv` como nombre predeterminado.
 
 **EN:**
-`write_results_csv()` must correctly create the CSV file without
-including the table's internal index.
+The file must be correctly written, preserve headers and values, and
+must not include the internal DataFrame index.
 
-The file must preserve the headers and values of the final table,
-including query information and the blocks corresponding to the
-databases.
-
-When no output path is specified, the generated file must be named
-`results.csv`.
+When no path is provided through `--output`, `results.csv` must be used
+as the default filename.
 
 ---
 
-## CP-24 - Ejecución CLI real con datos biológicos / Real CLI Execution with Biological Data
+## CP-23 - Flujo completo biocol run / Complete biocol run Workflow
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
+
+### Tipo de prueba / Test Type
+
+Integración / Integration
 
 ### Funciones evaluadas / Functions Under Test
 
@@ -1258,79 +898,79 @@ When no output path is specified, the generated file must be named
 
 `write_results_csv()`
 
-### Entrada / Input
-
-Query:
-
-`Query_benincasa_hispida_pep.fa`
-
-Base de datos:
-
-`protein.faa` de *Cucumis melo*
-
-Archivo de accesiones:
-
-`Benincasa_hispida_gd.txt`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta se ejecuta mediante la interfaz de línea de comandos
-utilizando archivos biológicos reales.
+El usuario proporciona:
 
-La query contiene secuencias proteicas de *Benincasa hispida* y la base
-de datos contiene secuencias proteicas de *Cucumis melo*.
+- una query FASTA;
+- una base FASTA o carpeta de bases;
+- un archivo de accesiones;
+- opcionalmente una ruta de salida.
+
+La herramienta debe ejecutar todo el flujo automáticamente.
+
+También se realizó una prueba manual con datos biológicos reales de
+*Benincasa hispida* y *Cucumis melo*.
 
 **EN:**
-The tool is executed through the command-line interface using real
-biological files.
+The user provides:
 
-The query contains protein sequences from *Benincasa hispida* and the
-database contains protein sequences from *Cucumis melo*.
+- a FASTA query;
+- a FASTA database or database directory;
+- an accessions file;
+- optionally an output path.
+
+The tool must automatically execute the complete workflow.
+
+A manual test was also performed using real biological data from
+*Benincasa hispida* and *Cucumis melo*.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El comando `biocol run` debe completar el flujo de procesamiento sin
-errores:
+La ejecución debe completar correctamente:
 
-1. leer y validar la query;
-2. preparar la base de datos;
-3. seleccionar y ejecutar el programa BLAST correspondiente;
-4. procesar los resultados;
-5. construir la tabla final;
-6. escribir el archivo CSV.
+1. lectura y validación de la query;
+2. detección del tipo de secuencia;
+3. detección de las bases;
+4. selección del programa BLAST;
+5. ejecución de BLAST+;
+6. parseo de resultados;
+7. asociación de accesiones/descriptores;
+8. construcción de la tabla;
+9. escritura del CSV.
 
-El archivo de salida debe contener las columnas de información de query
-y los campos correspondientes a los hits BLAST.
-
-Los campos de descripción pueden quedar representados mediante `---`
-cuando no exista una descripción asociada para el accession encontrado.
+La prueba con datos reales generó correctamente un archivo CSV de
+resultados.
 
 **EN:**
-The `biocol run` command must complete the processing workflow without
-errors:
+Execution must correctly complete:
 
-1. read and validate the query;
-2. prepare the database;
-3. select and execute the corresponding BLAST program;
-4. process the results;
-5. build the final table;
-6. write the CSV file.
+1. query reading and validation;
+2. sequence type detection;
+3. database detection;
+4. BLAST program selection;
+5. BLAST+ execution;
+6. result parsing;
+7. accession/descriptor matching;
+8. table construction;
+9. CSV writing.
 
-The output file must contain query information columns and the fields
-corresponding to BLAST hits.
-
-Description fields may be represented by `---` when no associated
-description exists for a matched accession.
+The test using real biological data successfully generated a results
+CSV file.
 
 ---
 
-## CP-25 - Procesamiento desde un resultado BLAST existente / Processing from Existing BLAST Output
+## CP-24 - Flujo completo biocol from-blast / Complete biocol from-blast Workflow
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
+
+### Tipo de prueba / Test Type
+
+Integración / Integration
 
 ### Funciones evaluadas / Functions Under Test
 
@@ -1342,332 +982,187 @@ description exists for a matched accession.
 
 `write_results_csv()`
 
-### Entrada / Input
-
-Archivo BLAST:
-
-`tests/fixtures/blast_outfmt6.txt`
-
-Archivo de accesiones:
-
-`tests/fixtures/accessions.txt`
-
 ### Condición de prueba / Test Condition
 
 **ES:**
-La herramienta recibe un archivo de resultados BLAST previamente
-generado en formato tabular `outfmt 6` de 12 columnas y un archivo
-de accesiones con descriptores.
+El usuario ya dispone de un archivo BLAST tabular `outfmt 6` y un
+archivo de accesiones.
 
-El procesamiento se realiza mediante el comando `biocol from-blast`,
-por lo que BLAST+ no debe ejecutarse nuevamente.
+No se proporciona el FASTA original de la query y BLAST+ no debe
+ejecutarse nuevamente.
 
 **EN:**
-The tool receives a previously generated BLAST results file in the
-12-column `outfmt 6` tabular format and an accession descriptor file.
+The user already has a tabular BLAST `outfmt 6` file and an accessions
+file.
 
-Processing is performed using the `biocol from-blast` command, so
-BLAST+ must not be executed again.
+The original query FASTA is not provided and BLAST+ must not be executed
+again.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-El comando debe leer y procesar correctamente el archivo BLAST y
-generar un archivo CSV final.
+El comando debe procesar directamente el resultado BLAST y generar el
+CSV final.
 
-El campo `gene_id` debe obtenerse a partir de `qseqid`.
+`gene_id` debe obtenerse de `qseqid`.
 
-Debido a que esta ruta no recibe un archivo FASTA de query, las
-columnas:
+Debido a que no existe FASTA de query, deben permanecer vacíos:
 
 - `length_nt`
 - `cdna_sequence`
 - `length_aa`
 - `protein_sequence`
 
-deben permanecer vacías.
-
-El bloque correspondiente a la base de datos debe derivarse del nombre
-del archivo de accesiones.
-
-Los valores de identidad, longitud del alineamiento, e-value y score
-deben conservar la información del resultado BLAST.
-
-Cuando no exista una descripción asociada a una accession, el campo
-de descripción puede representarse mediante `---`.
+Los datos correspondientes a los hits BLAST deben conservarse.
 
 **EN:**
-The command must correctly read and process the BLAST file and generate
-a final CSV file.
+The command must directly process the BLAST results and generate the
+final CSV.
 
-The `gene_id` field must be obtained from `qseqid`.
+`gene_id` must be obtained from `qseqid`.
 
-Because this path does not receive a query FASTA file, the following
-columns:
+Because no query FASTA is available, the following fields must remain
+empty:
 
 - `length_nt`
 - `cdna_sequence`
 - `length_aa`
 - `protein_sequence`
 
-must remain empty.
-
-The database block must be derived from the accession filename.
-
-Identity, alignment length, e-value, and score values must preserve
-the information from the BLAST result.
-
-When no description is associated with an accession, the description
-field may be represented by `---`.
+BLAST hit information must be preserved.
 
 ---
 
-## CP-26 - Archivo BLAST inexistente en from-blast / Missing BLAST File in from-blast
+## CP-25 - Validación y manejo de errores de la CLI / CLI Validation and Error Handling
 
 ### Estado / Status
 
 ✅ Cubierto / Covered
 
+### Tipo de prueba / Test Type
+
+Integración manual / Manual Integration
+
 ### Funciones evaluadas / Functions Under Test
+
+`biocol run`
 
 `biocol from-blast`
 
-### Condición de prueba / Test Condition
+### Condiciones probadas / Tested Conditions
 
 **ES:**
-El usuario ejecuta `biocol from-blast` indicando una ruta hacia un archivo
-BLAST que no existe.
+Se verificó el comportamiento de la CLI ante entradas incorrectas,
+incluyendo:
+
+- query inexistente en `biocol run`;
+- base de datos inexistente en `biocol run`;
+- archivo de accesiones inexistente;
+- archivo BLAST inexistente en `biocol from-blast`;
+- argumentos obligatorios faltantes.
 
 **EN:**
-The user runs `biocol from-blast` using a path to a BLAST file that does
-not exist.
+CLI behavior was verified with invalid inputs, including:
+
+- missing query in `biocol run`;
+- missing database in `biocol run`;
+- missing accessions file;
+- missing BLAST file in `biocol from-blast`;
+- missing required arguments.
 
 ### Resultado esperado / Expected Result
 
 **ES:**
-La CLI debe detectar que el archivo BLAST no existe, mostrar un mensaje
-de error y finalizar con código de salida `1`.
+La herramienta debe mostrar un mensaje de error comprensible y evitar
+que el procesamiento continúe.
 
-No debe generarse el archivo CSV de salida.
+Los errores detectados durante el procesamiento deben finalizar con un
+código de salida distinto de `0`.
+
+Cuando `argparse` detecta argumentos obligatorios faltantes, la
+ejecución finaliza con código `2`.
+
+Los errores de archivos inexistentes o fallos controlados durante el
+procesamiento finalizan con código `1`.
 
 **EN:**
-The CLI must detect that the BLAST file does not exist, display an error
-message, and terminate with exit code `1`.
+The tool must display an understandable error message and prevent
+processing from continuing.
 
-No output CSV file must be generated.
+Errors detected during processing must terminate with a non-zero exit
+code.
+
+When `argparse` detects missing required arguments, execution terminates
+with exit code `2`.
+
+Missing files and controlled processing failures terminate with exit
+code `1`.
 
 ---
 
-## CP-27 - Archivo de accesiones inexistente / Missing Accessions File
+# Resumen de cobertura / Coverage Summary
 
-### Estado / Status
+Los casos de prueba documentados cubren los principales componentes
+desarrollados durante HU-01:
 
-✅ Cubierto / Covered
+- lectura y validación de archivos FASTA;
+- archivos FASTA y multiFASTA;
+- identificación de secuencias nucleotídicas y proteicas;
+- detección y validación de bases de datos;
+- selección automática de `blastn`, `blastp`, `blastx`, `tblastn` y
+  `tblastx`;
+- ejecución local de BLAST+;
+- procesamiento de una o múltiples bases FASTA;
+- parseo de resultados BLAST `outfmt 6`;
+- conservación de queries sin hits;
+- parámetros configurables de BLAST;
+- manejo de errores de ejecución de BLAST;
+- normalización y carga de accesiones;
+- asociación opcional de descriptores;
+- construcción de la tabla final;
+- incorporación de información de la secuencia query;
+- generación del archivo CSV;
+- flujo completo mediante `biocol run`;
+- flujo alternativo mediante `biocol from-blast`;
+- manejo de errores desde la interfaz de línea de comandos.
 
-### Funciones evaluadas / Functions Under Test
+La suite automatizada actual se ejecutó correctamente con:
 
-`biocol from-blast`
+`57 passed`
 
-### Condición de prueba / Test Condition
-
-**ES:**
-El usuario proporciona un archivo BLAST válido, pero la ruta del archivo
-de accesiones no existe.
-
-**EN:**
-The user provides a valid BLAST file, but the accessions file path does
-not exist.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe detectar que el archivo de accesiones no existe, mostrar un
-mensaje de error y finalizar con código de salida `1`.
-
-El procesamiento de la tabla final no debe continuar.
-
-**EN:**
-The CLI must detect that the accessions file does not exist, display an
-error message, and terminate with exit code `1`.
-
-Final table processing must not continue.
-
----
-
-## CP-28 - Argumentos obligatorios faltantes / Missing Required Arguments
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`biocol from-blast`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El comando `biocol from-blast` se ejecuta sin proporcionar los argumentos
-obligatorios `--blast` y `--accessions`.
-
-**EN:**
-The `biocol from-blast` command is executed without providing the
-required `--blast` and `--accessions` arguments.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe mostrar el mensaje de uso del comando e indicar cuáles
-argumentos obligatorios faltan.
-
-La ejecución debe finalizar con código de salida `2`.
-
-**EN:**
-The CLI must display the command usage message and indicate which
-required arguments are missing.
-
-Execution must terminate with exit code `2`.
+Además de las pruebas automatizadas, se realizaron pruebas manuales de
+integración mediante la CLI y una ejecución con archivos biológicos
+reales.
 
 ---
 
-## CP-29 - Query inexistente en run / Missing Query File in run
+The documented test cases cover the main components developed during
+HU-01:
 
-### Estado / Status
+- FASTA reading and validation;
+- FASTA and multiFASTA files;
+- nucleotide and protein sequence identification;
+- database detection and validation;
+- automatic selection of `blastn`, `blastp`, `blastx`, `tblastn`, and
+  `tblastx`;
+- local BLAST+ execution;
+- processing of one or multiple FASTA databases;
+- BLAST `outfmt 6` result parsing;
+- preservation of queries without hits;
+- configurable BLAST parameters;
+- BLAST execution error handling;
+- accession normalization and loading;
+- optional descriptor association;
+- final results table construction;
+- query sequence metadata integration;
+- CSV generation;
+- complete workflow through `biocol run`;
+- alternative workflow through `biocol from-blast`;
+- command-line error handling.
 
-✅ Cubierto / Covered
+The current automated test suite completed successfully with:
 
-### Funciones evaluadas / Functions Under Test
+`57 passed`
 
-`biocol run`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El usuario ejecuta `biocol run` indicando una ruta hacia un archivo
-query que no existe.
-
-**EN:**
-The user runs `biocol run` using a path to a query file that does
-not exist.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe detectar que el archivo query no existe, mostrar un mensaje
-de error y finalizar con código de salida distinto de `0`.
-
-No debe generarse el CSV de resultados.
-
-**EN:**
-The CLI must detect that the query file does not exist, display an error
-message, and terminate with a non-zero exit code.
-
-No results CSV file must be generated.
-
----
-
-## CP-30 - Base de datos inexistente en run / Missing Database in run
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`biocol run`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El usuario proporciona una query válida, pero la ruta indicada mediante
-`--db` no existe.
-
-**EN:**
-The user provides a valid query, but the path specified through `--db`
-does not exist.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe detectar que la base de datos no existe, informar el error
-y finalizar con código de salida distinto de `0`.
-
-La ejecución de BLAST no debe continuar.
-
-**EN:**
-The CLI must detect that the database does not exist, report the error,
-and terminate with a non-zero exit code.
-
-BLAST execution must not continue.
-
----
-
-## CP-31 - Archivo de accesiones inexistente en run / Missing Accessions File in run
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`biocol run`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-La query y la base de datos son válidas, pero el archivo proporcionado
-mediante `--accessions` no existe.
-
-**EN:**
-The query and database are valid, but the file provided through
-`--accessions` does not exist.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe detectar la ausencia del archivo de accesiones, mostrar un
-mensaje de error y finalizar con código de salida distinto de `0`.
-
-No debe generarse una tabla final válida.
-
-**EN:**
-The CLI must detect the missing accessions file, display an error
-message, and terminate with a non-zero exit code.
-
-No valid final table must be generated.
-
----
-
-## CP-32 - Argumentos obligatorios faltantes en run / Missing Required Arguments in run
-
-### Estado / Status
-
-✅ Cubierto / Covered
-
-### Funciones evaluadas / Functions Under Test
-
-`biocol run`
-
-### Condición de prueba / Test Condition
-
-**ES:**
-El comando `biocol run` se ejecuta sin proporcionar sus argumentos
-obligatorios.
-
-**EN:**
-The `biocol run` command is executed without providing its required
-arguments.
-
-### Resultado esperado / Expected Result
-
-**ES:**
-La CLI debe mostrar el mensaje de uso e indicar los argumentos
-obligatorios faltantes.
-
-La ejecución debe finalizar con un código de salida distinto de `0`.
-
-**EN:**
-The CLI must display the usage message and indicate the missing required
-arguments.
-
-Execution must terminate with a non-zero exit code.
+In addition to automated tests, manual CLI integration tests and an
+execution using real biological files were performed.

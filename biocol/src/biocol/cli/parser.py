@@ -25,7 +25,18 @@ def build_parser() -> argparse.ArgumentParser:
             "of FASTA files, join accession descriptors, and write the CSV."
         ),
     )
-    run.add_argument("--query", required=True, help="Query FASTA / multifasta")
+    run.add_argument("--query", required=True, help="Query FASTA / multifasta used for BLAST")
+    run.add_argument(
+        "--cdna",
+        default=None,
+        help="Optional cDNA FASTA (gene models): fills Length (nt) and cDNA columns",
+    )
+    run.add_argument(
+        "--protein",
+        default=None,
+        dest="protein_fasta",
+        help="Optional protein FASTA (gene models): fills Length(aa) and protein columns",
+    )
     run.add_argument(
         "--db",
         required=True,

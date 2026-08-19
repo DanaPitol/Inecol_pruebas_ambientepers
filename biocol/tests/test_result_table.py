@@ -113,6 +113,71 @@ def test_write_results_csv_default_name(tmp_path: Path, fixtures_dir: Path, monk
     path = write_results_csv(table)
     assert path.name == DEFAULT_OUTPUT
     assert path.exists()
-    loaded = pd.read_csv(path)
-    assert "amborella_evalue" in loaded.columns
-    assert "vitis_score" in loaded.columns
+    loaded = pd.read_csv(path, header=None)
+    section = loaded.iloc[0].astype(str).tolist()
+    assert section.count("Annotation based on top-BLAST-hit method") == 2
+    assert "Accesion No." in set(loaded.iloc[2].astype(str))
+    assert "e-value" in set(loaded.iloc[2].astype(str))
+    assert "Score" in set(loaded.iloc[2].astype(str))
+    assert "amborella" in set(loaded.iloc[1].astype(str))
+    assert "vitis" in set(loaded.iloc[1].astype(str))
+
+
+def test_write_results_csv_drops_empty_nucleotide_columns(tmp_path: Path, fixtures_dir: Path) -> None:
+    hits = _hits()
+    hits["qseqid"] = "prot1"
+    table = build_result_table(
+        hits,
+        fixtures_dir / "accessions.txt",
+        query_fasta=fixtures_dir / "protein.fa",
+    )
+    path = write_results_csv(table, tmp_path / "prot.csv")
+    labels = pd.read_csv(path, header=None).iloc[2].astype(str).tolist()
+    assert "Gene ID" in labels
+    assert "Length(aa)" in labels
+    assert "Protein Sequences (aa)" in labels
+    assert "Length (nt)" not in labels
+    assert "cDNA Sequences (nt)" not in labels
+
+
+def test_gene_model_fills_nt_and_aa(tmp_path: Path, fixtures_dir: Path) -> None:
+    cdna = tmp_path / "gene.fna"
+    pep = tmp_path / "gene.faa"
+    cdna.write_text(">seq1\nATGCGATCGATCGATCGTAGCTAGCTAG\n", encoding="utf-8")
+    pep.write_text(">seq1\nMVLSPADKTNVKAAWGKVGAHAGEYGAEALER\n", encoding="utf-8")
+    table = build_result_table(
+        _hits(),
+        fixtures_dir / "accessions.txt",
+        query_fasta=pep,
+        cdna_fasta=cdna,
+        protein_fasta=pep,
+    )
+    row = table.iloc[0]
+    assert row["length_nt"] == 28
+    assert row["length_aa"] == 32
+    assert isinstance(row["cdna_sequence"], str)
+    assert isinstance(row["protein_sequence"], str)
+
+
+def test_cds_matches_protein_id_in_header(tmp_path: Path, fixtures_dir: Path) -> None:
+    pep = tmp_path / "prot.faa"
+    cds = tmp_path / "cds.fna"
+    pep.write_text(">NP_171609.1\nMVLSPADKTNVKAAWGKVGAHAGEYGAEALER\n", encoding="utf-8")
+    cds.write_text(
+        ">lcl|NC_003070.9_cds_NP_171609.1_1 [protein_id=NP_171609.1] [gene=NAC001]\n"
+        "ATGCGATCGATCGATCGTAGCTAGCTAG\n",
+        encoding="utf-8",
+    )
+    hits = _hits()
+    hits["qseqid"] = "NP_171609.1"
+    table = build_result_table(
+        hits,
+        fixtures_dir / "accessions.txt",
+        query_fasta=pep,
+        cdna_fasta=cds,
+        protein_fasta=pep,
+    )
+    row = table.iloc[0]
+    assert row["gene_id"] == "NP_171609.1"
+    assert row["length_nt"] == 28
+    assert isinstance(row["cdna_sequence"], str)

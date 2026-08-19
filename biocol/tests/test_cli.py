@@ -20,9 +20,10 @@ def test_from_blast_writes_csv(tmp_path: Path, fixtures_dir: Path) -> None:
     )
     assert code == 0
     assert output.exists()
-    table = pd.read_csv(output)
-    assert "accessions_accession" in table.columns
-    assert "q1" in set(table["gene_id"].astype(str))
+    table = pd.read_csv(output, header=2)
+    assert "Gene ID" in table.columns
+    assert "Accesion No." in table.columns
+    assert "q1" in set(table["Gene ID"].astype(str))
 
 
 def test_from_blast_missing_file_returns_error(tmp_path: Path) -> None:

@@ -49,7 +49,7 @@ def load_accessions(path: str | Path) -> pd.DataFrame:
     """Lee ``accession<TAB>descriptor`` (sin encabezado)."""
     acc_path = Path(path)
     if not acc_path.exists():
-        raise FileNotFoundError(f"No existe el archivo de accesiones: {acc_path}")
+        raise FileNotFoundError(f"Accessions file not found: {acc_path}")
     try:
         frame = pd.read_csv(
             acc_path,
@@ -60,13 +60,13 @@ def load_accessions(path: str | Path) -> pd.DataFrame:
             comment="#",
         )
     except Exception as exc:
-        raise MetadataError(f"No se pudo leer accesiones: {acc_path}") from exc
+        raise MetadataError(f"Could not read accessions: {acc_path}") from exc
 
     frame = frame.dropna(how="all")
     if frame.empty:
-        raise MetadataError(f"El archivo de accesiones no tiene filas: {acc_path}")
+        raise MetadataError(f"Accessions file has no rows: {acc_path}")
     if frame["accession"].isna().any() or (frame["accession"].str.strip() == "").any():
-        raise MetadataError("Hay filas sin accession en el archivo de metadatos")
+        raise MetadataError("Accessions file has rows without an accession")
 
     frame["accession"] = frame["accession"].str.strip()
     frame["description"] = frame["description"].fillna("").str.strip()

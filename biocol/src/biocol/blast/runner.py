@@ -44,7 +44,7 @@ def build_blast_command(
     out_file: Path,
     *,
     evalue: float = 10,
-    max_target_seqs: int = 500,
+    max_target_seqs: int = 3,
     num_threads: int = 1,
 ) -> list[str]:
     return [
@@ -70,7 +70,7 @@ def _run_command(command: list[str]) -> None:
     executable = command[0]
     if shutil.which(executable) is None:
         raise BlastExecutionError(
-            f"No se encontró '{executable}' en el PATH. Active el entorno conda inecol."
+            f"'{executable}' was not found in PATH. Activate the conda environment inecol."
         )
     logger.info("ejecutar: %s", " ".join(command))
     completed = subprocess.run(
@@ -81,7 +81,7 @@ def _run_command(command: list[str]) -> None:
     )
     if completed.returncode != 0:
         raise BlastExecutionError(
-            f"{executable} falló (código {completed.returncode}): {completed.stderr.strip()}"
+            f"{executable} failed (exit code {completed.returncode}): {completed.stderr.strip()}"
         )
 
 

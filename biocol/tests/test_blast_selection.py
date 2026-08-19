@@ -56,7 +56,7 @@ def test_empty_folder_raises(tmp_path: Path) -> None:
 def test_non_fasta_file_raises(tmp_path: Path) -> None:
     other = tmp_path / "db.txt"
     other.write_text("no fasta", encoding="utf-8")
-    with pytest.raises(DatabaseError, match="debe ser FASTA"):
+    with pytest.raises(DatabaseError, match="must be FASTA"):
         detect_database_type(other)
 
 

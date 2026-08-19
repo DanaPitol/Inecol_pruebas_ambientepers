@@ -15,13 +15,13 @@ def check_fasta_path(path: str | Path) -> Path:
     """Comprueba que la ruta exista, sea un archivo y tenga extensión FASTA."""
     fasta_path = Path(path)
     if not fasta_path.exists():
-        raise FileNotFoundError(f"No existe el archivo FASTA: {fasta_path}")
+        raise FileNotFoundError(f"FASTA file not found: {fasta_path}")
     if not fasta_path.is_file():
-        raise InvalidFastaError(f"La ruta no es un archivo: {fasta_path}")
+        raise InvalidFastaError(f"Path is not a file: {fasta_path}")
     if fasta_path.suffix.lower() not in FASTA_EXTENSIONS:
         raise InvalidFastaError(
-            f"Extensión no soportada: {fasta_path.suffix}. "
-            f"Use una de: {', '.join(sorted(FASTA_EXTENSIONS))}"
+            f"Unsupported extension: {fasta_path.suffix}. "
+            f"Use one of: {', '.join(sorted(FASTA_EXTENSIONS))}"
         )
     return fasta_path
 
@@ -30,11 +30,11 @@ def validate_seq_record(record: SeqRecord, source: str | Path) -> None:
     """Verifica que un SeqRecord de Biopython tenga secuencia usable."""
     sequence = str(record.seq).upper()
     if not sequence:
-        raise InvalidFastaError(f"La secuencia '{record.id}' está vacía en {source}")
+        raise InvalidFastaError(f"Sequence '{record.id}' is empty in {source}")
     invalid = {char for char in sequence if char not in VALID_RESIDUES}
     if invalid:
         raise InvalidFastaError(
-            f"La secuencia '{record.id}' contiene caracteres no válidos: "
+            f"Sequence '{record.id}' contains invalid characters: "
             f"{''.join(sorted(invalid))}"
         )
 

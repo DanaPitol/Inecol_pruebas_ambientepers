@@ -42,7 +42,7 @@ def list_blast_databases(source: str | Path) -> list[tuple[Path, SequenceType]]:
         fasta_files = _iter_fasta_in_directory(raw)
         if not fasta_files:
             raise DatabaseError(
-                f"La carpeta no contiene archivos FASTA ({', '.join(sorted(FASTA_EXTENSIONS))}): {raw}"
+                f"Folder contains no FASTA files ({', '.join(sorted(FASTA_EXTENSIONS))}): {raw}"
             )
         return [(path, _type_from_fasta(path)) for path in fasta_files]
 
@@ -51,12 +51,12 @@ def list_blast_databases(source: str | Path) -> list[tuple[Path, SequenceType]]:
 
     if raw.is_file():
         raise DatabaseError(
-            f"La base debe ser FASTA ({', '.join(sorted(FASTA_EXTENSIONS))}), no {raw.suffix}: {raw}"
+            f"Database must be FASTA ({', '.join(sorted(FASTA_EXTENSIONS))}), not {raw.suffix}: {raw}"
         )
 
     raise DatabaseError(
-        f"No se reconoció la base de datos: {source}. "
-        "Pase un archivo FASTA o una carpeta con archivos FASTA."
+        f"Unrecognized database: {source}. "
+        "Pass a FASTA file or a folder of FASTA files."
     )
 
 
@@ -75,7 +75,7 @@ def detect_database_type(source: str | Path) -> SequenceType:
             [(str(path), db_type) for path, db_type in entries],
         )
         raise MixedDatabaseTypeError(
-            "La entrada mezcla bases nucleotídicas y proteicas"
+            "Input mixes nucleotide and protein databases"
         )
     database_type = types[0]
     logger.info(

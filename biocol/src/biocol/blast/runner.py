@@ -18,6 +18,7 @@ from biocol.sequence.reader import read_fasta
 logger = logging.getLogger(__name__)
 
 _DBTYPE = {"nucleotide": "nucl", "protein": "prot"}
+DEFAULT_MAX_TARGET_SEQS = 3
 
 
 def build_makeblastdb_command(
@@ -44,7 +45,7 @@ def build_blast_command(
     out_file: Path,
     *,
     evalue: float = 10,
-    max_target_seqs: int = 500,
+    max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
     num_threads: int = 1,
 ) -> list[str]:
     return [
@@ -91,7 +92,7 @@ def run_blast(
     *,
     translated: bool = False,
     evalue: float = 10,
-    max_target_seqs: int = 500,
+    max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
     num_threads: int = 1,
 ) -> pd.DataFrame:
     """Ejecuta BLAST+ (un run por FASTA de base) y parsea outfmt 6.

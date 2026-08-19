@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from biocol import DEFAULT_OUTPUT
+from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_OUTPUT
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -55,9 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--max-target-seqs",
         type=int,
-        default=500,
+        default=DEFAULT_MAX_TARGET_SEQS,
         dest="max_target_seqs",
-        help="Maximum aligned sequences to keep (default: 500)",
+        help=f"Maximum aligned sequences to keep (default: {DEFAULT_MAX_TARGET_SEQS})",
     )
     run.add_argument(
         "--threads",

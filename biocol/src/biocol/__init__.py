@@ -1,6 +1,7 @@
 """Backend para lectura de FASTA, BLAST y construcción de la tabla de resultados."""
 
 from biocol.blast import (
+    DEFAULT_MAX_TARGET_SEQS,
     detect_database_type,
     list_blast_databases,
     parse_blast_results,
@@ -31,6 +32,7 @@ from biocol.sequence import (
 __all__ = [
     "BlastError",
     "BlastExecutionError",
+    "DEFAULT_MAX_TARGET_SEQS",
     "DEFAULT_OUTPUT",
     "DatabaseError",
     "EmptyFastaError",

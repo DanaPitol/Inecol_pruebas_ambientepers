@@ -7,7 +7,12 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from biocol.exceptions import MixedSequenceTypeError
-from biocol.sequence.alphabets import GAP_LETTERS, NUCLEOTIDE_LETTERS, PROTEIN_ONLY_LETTERS
+from biocol.sequence.alphabets import (
+    GAP_LETTERS,
+    NUCLEOTIDE_LETTERS,
+    PROTEIN_ONLY_LETTERS,
+    UNAMBIGUOUS_NUCLEOTIDE_LETTERS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +37,12 @@ def _sequence_id(sequence: SequenceLike) -> str:
 def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
     """Clasifica una secuencia como ``nucleotide`` o ``protein``.
 
-    Usa los alfabetos IUPAC de ``Bio.Data.IUPACData``. El ARN (U) se trata
-    como nucleótido. Letras solo proteicas (E, F, L, P, Q, ...) marcan proteína.
+    Usa ``Bio.Data.IUPACData``. El ARN (U) cuenta como nucleótido.
+
+    Las letras solo proteicas (E, F, I, L, P, Q, ...) marcan proteína.
+    Los códigos de ambigüedad nucleotídica (K, R, Y, ...) también son
+    aminoácidos: sin al menos una base inequívoca (A, C, G, T o U) la
+    secuencia se trata como proteína (p. ej. poli-lisina ``KKK…``).
     """
     residues = _residues(sequence)
     if not residues:
@@ -41,7 +50,9 @@ def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
 
     if any(char in PROTEIN_ONLY_LETTERS for char in residues):
         sequence_type = "protein"
-    elif all(char in NUCLEOTIDE_LETTERS for char in residues):
+    elif all(char in NUCLEOTIDE_LETTERS for char in residues) and any(
+        char in UNAMBIGUOUS_NUCLEOTIDE_LETTERS for char in residues
+    ):
         sequence_type = "nucleotide"
     else:
         sequence_type = "protein"

@@ -53,6 +53,14 @@ def test_mixed_multifasta_raises(fixtures_dir: Path) -> None:
         detect_query_type(records)
 
 
+def test_poly_lysine_is_protein_not_nucleotide() -> None:
+    assert detect_sequence_type("K" * 169) == "protein"
+
+
+def test_dna_with_iupac_ambiguity_is_nucleotide() -> None:
+    assert detect_sequence_type("ATGCGATCGTAGCTAGNNNNKK") == "nucleotide"
+
+
 def test_unclassifiable_sequence_raises() -> None:
     with pytest.raises(ValueError, match="classifiable"):
         detect_sequence_type("---")

@@ -1239,3 +1239,435 @@ databases.
 
 When no output path is specified, the generated file must be named
 `results.csv`.
+
+---
+
+## CP-24 - Ejecución CLI real con datos biológicos / Real CLI Execution with Biological Data
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol run`
+
+`run_blast()`
+
+`build_result_table()`
+
+`write_results_csv()`
+
+### Entrada / Input
+
+Query:
+
+`Query_benincasa_hispida_pep.fa`
+
+Base de datos:
+
+`protein.faa` de *Cucumis melo*
+
+Archivo de accesiones:
+
+`Benincasa_hispida_gd.txt`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta se ejecuta mediante la interfaz de línea de comandos
+utilizando archivos biológicos reales.
+
+La query contiene secuencias proteicas de *Benincasa hispida* y la base
+de datos contiene secuencias proteicas de *Cucumis melo*.
+
+**EN:**
+The tool is executed through the command-line interface using real
+biological files.
+
+The query contains protein sequences from *Benincasa hispida* and the
+database contains protein sequences from *Cucumis melo*.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El comando `biocol run` debe completar el flujo de procesamiento sin
+errores:
+
+1. leer y validar la query;
+2. preparar la base de datos;
+3. seleccionar y ejecutar el programa BLAST correspondiente;
+4. procesar los resultados;
+5. construir la tabla final;
+6. escribir el archivo CSV.
+
+El archivo de salida debe contener las columnas de información de query
+y los campos correspondientes a los hits BLAST.
+
+Los campos de descripción pueden quedar representados mediante `---`
+cuando no exista una descripción asociada para el accession encontrado.
+
+**EN:**
+The `biocol run` command must complete the processing workflow without
+errors:
+
+1. read and validate the query;
+2. prepare the database;
+3. select and execute the corresponding BLAST program;
+4. process the results;
+5. build the final table;
+6. write the CSV file.
+
+The output file must contain query information columns and the fields
+corresponding to BLAST hits.
+
+Description fields may be represented by `---` when no associated
+description exists for a matched accession.
+
+---
+
+## CP-25 - Procesamiento desde un resultado BLAST existente / Processing from Existing BLAST Output
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol from-blast`
+
+`parse_blast_results()`
+
+`build_result_table()`
+
+`write_results_csv()`
+
+### Entrada / Input
+
+Archivo BLAST:
+
+`tests/fixtures/blast_outfmt6.txt`
+
+Archivo de accesiones:
+
+`tests/fixtures/accessions.txt`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La herramienta recibe un archivo de resultados BLAST previamente
+generado en formato tabular `outfmt 6` de 12 columnas y un archivo
+de accesiones con descriptores.
+
+El procesamiento se realiza mediante el comando `biocol from-blast`,
+por lo que BLAST+ no debe ejecutarse nuevamente.
+
+**EN:**
+The tool receives a previously generated BLAST results file in the
+12-column `outfmt 6` tabular format and an accession descriptor file.
+
+Processing is performed using the `biocol from-blast` command, so
+BLAST+ must not be executed again.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+El comando debe leer y procesar correctamente el archivo BLAST y
+generar un archivo CSV final.
+
+El campo `gene_id` debe obtenerse a partir de `qseqid`.
+
+Debido a que esta ruta no recibe un archivo FASTA de query, las
+columnas:
+
+- `length_nt`
+- `cdna_sequence`
+- `length_aa`
+- `protein_sequence`
+
+deben permanecer vacías.
+
+El bloque correspondiente a la base de datos debe derivarse del nombre
+del archivo de accesiones.
+
+Los valores de identidad, longitud del alineamiento, e-value y score
+deben conservar la información del resultado BLAST.
+
+Cuando no exista una descripción asociada a una accession, el campo
+de descripción puede representarse mediante `---`.
+
+**EN:**
+The command must correctly read and process the BLAST file and generate
+a final CSV file.
+
+The `gene_id` field must be obtained from `qseqid`.
+
+Because this path does not receive a query FASTA file, the following
+columns:
+
+- `length_nt`
+- `cdna_sequence`
+- `length_aa`
+- `protein_sequence`
+
+must remain empty.
+
+The database block must be derived from the accession filename.
+
+Identity, alignment length, e-value, and score values must preserve
+the information from the BLAST result.
+
+When no description is associated with an accession, the description
+field may be represented by `---`.
+
+---
+
+## CP-26 - Archivo BLAST inexistente en from-blast / Missing BLAST File in from-blast
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol from-blast`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El usuario ejecuta `biocol from-blast` indicando una ruta hacia un archivo
+BLAST que no existe.
+
+**EN:**
+The user runs `biocol from-blast` using a path to a BLAST file that does
+not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe detectar que el archivo BLAST no existe, mostrar un mensaje
+de error y finalizar con código de salida `1`.
+
+No debe generarse el archivo CSV de salida.
+
+**EN:**
+The CLI must detect that the BLAST file does not exist, display an error
+message, and terminate with exit code `1`.
+
+No output CSV file must be generated.
+
+---
+
+## CP-27 - Archivo de accesiones inexistente / Missing Accessions File
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol from-blast`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El usuario proporciona un archivo BLAST válido, pero la ruta del archivo
+de accesiones no existe.
+
+**EN:**
+The user provides a valid BLAST file, but the accessions file path does
+not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe detectar que el archivo de accesiones no existe, mostrar un
+mensaje de error y finalizar con código de salida `1`.
+
+El procesamiento de la tabla final no debe continuar.
+
+**EN:**
+The CLI must detect that the accessions file does not exist, display an
+error message, and terminate with exit code `1`.
+
+Final table processing must not continue.
+
+---
+
+## CP-28 - Argumentos obligatorios faltantes / Missing Required Arguments
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol from-blast`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El comando `biocol from-blast` se ejecuta sin proporcionar los argumentos
+obligatorios `--blast` y `--accessions`.
+
+**EN:**
+The `biocol from-blast` command is executed without providing the
+required `--blast` and `--accessions` arguments.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe mostrar el mensaje de uso del comando e indicar cuáles
+argumentos obligatorios faltan.
+
+La ejecución debe finalizar con código de salida `2`.
+
+**EN:**
+The CLI must display the command usage message and indicate which
+required arguments are missing.
+
+Execution must terminate with exit code `2`.
+
+---
+
+## CP-29 - Query inexistente en run / Missing Query File in run
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol run`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El usuario ejecuta `biocol run` indicando una ruta hacia un archivo
+query que no existe.
+
+**EN:**
+The user runs `biocol run` using a path to a query file that does
+not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe detectar que el archivo query no existe, mostrar un mensaje
+de error y finalizar con código de salida distinto de `0`.
+
+No debe generarse el CSV de resultados.
+
+**EN:**
+The CLI must detect that the query file does not exist, display an error
+message, and terminate with a non-zero exit code.
+
+No results CSV file must be generated.
+
+---
+
+## CP-30 - Base de datos inexistente en run / Missing Database in run
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol run`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El usuario proporciona una query válida, pero la ruta indicada mediante
+`--db` no existe.
+
+**EN:**
+The user provides a valid query, but the path specified through `--db`
+does not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe detectar que la base de datos no existe, informar el error
+y finalizar con código de salida distinto de `0`.
+
+La ejecución de BLAST no debe continuar.
+
+**EN:**
+The CLI must detect that the database does not exist, report the error,
+and terminate with a non-zero exit code.
+
+BLAST execution must not continue.
+
+---
+
+## CP-31 - Archivo de accesiones inexistente en run / Missing Accessions File in run
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol run`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+La query y la base de datos son válidas, pero el archivo proporcionado
+mediante `--accessions` no existe.
+
+**EN:**
+The query and database are valid, but the file provided through
+`--accessions` does not exist.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe detectar la ausencia del archivo de accesiones, mostrar un
+mensaje de error y finalizar con código de salida distinto de `0`.
+
+No debe generarse una tabla final válida.
+
+**EN:**
+The CLI must detect the missing accessions file, display an error
+message, and terminate with a non-zero exit code.
+
+No valid final table must be generated.
+
+---
+
+## CP-32 - Argumentos obligatorios faltantes en run / Missing Required Arguments in run
+
+### Estado / Status
+
+✅ Cubierto / Covered
+
+### Funciones evaluadas / Functions Under Test
+
+`biocol run`
+
+### Condición de prueba / Test Condition
+
+**ES:**
+El comando `biocol run` se ejecuta sin proporcionar sus argumentos
+obligatorios.
+
+**EN:**
+The `biocol run` command is executed without providing its required
+arguments.
+
+### Resultado esperado / Expected Result
+
+**ES:**
+La CLI debe mostrar el mensaje de uso e indicar los argumentos
+obligatorios faltantes.
+
+La ejecución debe finalizar con un código de salida distinto de `0`.
+
+**EN:**
+The CLI must display the usage message and indicate the missing required
+arguments.
+
+Execution must terminate with a non-zero exit code.

@@ -25,7 +25,7 @@ pip install -e ".[dev]"
 | Accesiones | Texto `accession<TAB>descriptor`, sin encabezado. |
 | BLAST tabular (camino 2) | `outfmt 6` estándar (12 columnas NCBI). |
 
-Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **500**.
+Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **3**.
 
 ## Cómo se elige el programa BLAST
 
@@ -53,7 +53,7 @@ hits = run_blast(
     "bases/",                 # un FASTA o carpeta
     translated=False,         # True → tblastx si query y base son nucleótido
     evalue=10,
-    max_target_seqs=500,
+    max_target_seqs=3,
 )
 table = build_result_table(hits, "accessions.txt", query_fasta="query.fa")
 write_results_csv(table, "results.csv")  # si se omite, usa results.csv

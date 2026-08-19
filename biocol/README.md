@@ -82,6 +82,7 @@ After `pip install -e ".[dev]"`:
 ```bash
 biocol run --query query.fa --db bases/ --accessions accessions.txt
 biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.csv
+biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna --protein genes.faa
 
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.csv
@@ -89,21 +90,21 @@ biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --outpu
 
 `--output` is optional (default: `results.csv`). Help text and errors are in English.
 
-`from-blast` does not take a query FASTA. The species/database column prefix is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa_hispida_gd_accession`, …).
+`from-blast` does not take a query FASTA. The species name in the CSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`).
 
 ## CSV de salida
 
-Tabla ancha (una fila por query y rango de hit). El rango 1 es el mejor hit de cada base, el 2 el segundo, y así sucesivamente. Se conservan **todos** los hits.
+CSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No hay celdas combinadas: el nombre de sección y el de la especie se repiten o quedan en la primera columna de cada bloque.
 
-Columnas de query (solo se llenan si hay FASTA y el tipo corresponde; si la query es proteína no se inventa cDNA):
+1. Sección: vacío en query; `Annotation based on top-BLAST-hit method` en cada bloque BLAST.
+2. Especie: `stem` del FASTA de base (p. ej. `protein`, `amborella`).
+3. Nombres de columna: `Gene ID`, `Length (nt)`, `cDNA Sequences (nt)`, `Length(aa)`, `Protein Sequences (aa)`, y por especie `Accesion No.`, `Description`, `Identity %`, `Alignment length`, `e-value`, `Score`.
 
-`gene_id`, `length_nt`, `cdna_sequence`, `length_aa`, `protein_sequence`
+No se incluyen Length (aa) ni secuencia del hit. Sin hit o sin descriptor: `---`.
 
-Por cada FASTA de base (`stem` del archivo):
+Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Si hay modelos de gen, se pueden pasar ambos FASTA (`--cdna` y `--protein`) y el primer bloque queda completo.
 
-`{db}_accession`, `{db}_description`, `{db}_identity_pct`, `{db}_alignment_length`, `{db}_evalue`, `{db}_score`
-
-Sin hit o sin descriptor: `---` en accession y description.
+Una fila por query y rango de hit (se conservan todos los hits). En Excel, importar el CSV y opcionalmente combinar celdas de las dos primeras filas.
 
 ## API pública
 

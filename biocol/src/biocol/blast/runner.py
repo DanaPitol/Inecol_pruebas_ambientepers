@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from biocol.blast.databases import detect_database_type, list_blast_databases
+from biocol.blast.databases import detect_database_type, infer_database_label, list_blast_databases
 from biocol.blast.parser import fill_missing_hits, parse_blast_results
 from biocol.blast.selection import select_blast_program
 from biocol.exceptions import BlastExecutionError
@@ -115,9 +115,10 @@ def run_blast(
     with tempfile.TemporaryDirectory(prefix="biocol_blast_") as tmp:
         tmp_path = Path(tmp)
         for fasta_path, _db_type in db_entries:
-            db_name = fasta_path.stem
-            prefix = tmp_path / db_name
-            out_file = tmp_path / f"{db_name}.txt"
+            file_stem = fasta_path.stem
+            db_label = infer_database_label(fasta_path)
+            prefix = tmp_path / file_stem
+            out_file = tmp_path / f"{file_stem}.txt"
             _run_command(build_makeblastdb_command(fasta_path, prefix, dbtype))
             _run_command(
                 build_blast_command(
@@ -131,12 +132,13 @@ def run_blast(
                 )
             )
             parsed = parse_blast_results(out_file)
-            parsed["database"] = db_name
-            filled = fill_missing_hits(parsed, query_ids, db_name)
+            parsed["database"] = db_label
+            filled = fill_missing_hits(parsed, query_ids, db_label)
             frames.append(filled)
             logger.info(
-                "run_blast: db=%s hits=%s filas=%s",
-                db_name,
+                "run_blast: db=%s archivo=%s hits=%s filas=%s",
+                db_label,
+                file_stem,
                 0 if parsed.empty else len(parsed),
                 len(filled),
             )

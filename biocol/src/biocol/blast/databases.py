@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import logging
+import re
+from collections import Counter
 from pathlib import Path
+
+from Bio import SeqIO
 
 from biocol.exceptions import DatabaseError, MixedDatabaseTypeError
 from biocol.sequence.classifier import detect_query_type
@@ -11,6 +15,28 @@ from biocol.sequence.validator import FASTA_EXTENSIONS
 logger = logging.getLogger(__name__)
 
 SequenceType = str
+_ORGANISM_BRACKET = re.compile(r"\[([^\]]+)\]\s*$")
+
+
+def infer_database_label(fasta_path: Path, sample: int = 40) -> str:
+    """Nombre de especie/base: organismo en headers NCBI ``[Genus species]``.
+
+    Si no hay un organismo mayoritario, usa el stem del archivo FASTA.
+    """
+    organisms: list[str] = []
+    with fasta_path.open(encoding="utf-8", errors="replace") as handle:
+        for index, record in enumerate(SeqIO.parse(handle, "fasta")):
+            if index >= sample:
+                break
+            match = _ORGANISM_BRACKET.search(record.description)
+            if match:
+                organisms.append(match.group(1).strip())
+    if organisms:
+        name, count = Counter(organisms).most_common(1)[0]
+        if count >= max(1, (len(organisms) + 1) // 2):
+            logger.info("infer_database_label: %s → %s", fasta_path.name, name)
+            return name
+    return fasta_path.stem
 
 
 def _is_fasta_file(path: Path) -> bool:

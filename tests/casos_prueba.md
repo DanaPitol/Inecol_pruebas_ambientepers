@@ -506,14 +506,42 @@ compatible FASTA files of the same type.
 **ES:**
 Cada archivo FASTA debe procesarse como una base independiente.
 
-Los resultados combinados deben conservar un identificador que permita
-saber qué base produjo cada hit.
+Los resultados combinados deben conservar una etiqueta que permita
+identificar qué especie o base produjo cada hit.
+
+Cuando los encabezados FASTA contienen información de organismo en
+formato NCBI, por ejemplo:
+
+`[Cucumis melo]`
+
+la herramienta debe utilizar el organismo detectado como etiqueta de
+la base.
+
+Si no puede inferirse un organismo a partir de los encabezados, debe
+utilizarse como respaldo el nombre del archivo FASTA sin extensión.
+
+Ejemplo:
+
+`amborella.faa` → `amborella`
 
 **EN:**
 Each FASTA file must be processed as an independent database.
 
-Combined results must preserve an identifier indicating which database
-produced each hit.
+Combined results must preserve a label identifying which species or
+database produced each hit.
+
+When FASTA headers contain NCBI organism information, for example:
+
+`[Cucumis melo]`
+
+the detected organism must be used as the database label.
+
+If an organism cannot be inferred from the headers, the FASTA filename
+without its extension must be used as a fallback.
+
+Example:
+
+`amborella.faa` → `amborella`
 
 ---
 
@@ -803,42 +831,54 @@ query.
 
 **EN:**
 The final table is built using the original query FASTA file.
-
 ### Resultado esperado / Expected Result
 
 **ES:**
-Para una query nucleotídica deben completarse:
+Si únicamente se proporciona el FASTA utilizado como query, la herramienta
+debe completar los campos correspondientes al tipo de secuencia disponible.
+
+Para una query nucleotídica se completan:
 
 - `gene_id`
 - `length_nt`
 - `cdna_sequence`
 
-y los campos proteicos deben permanecer vacíos.
-
-Para una query proteica deben completarse:
+Para una query proteica se completan:
 
 - `gene_id`
 - `length_aa`
 - `protein_sequence`
 
-y los campos nucleotídicos deben permanecer vacíos.
+Cuando el usuario proporciona además archivos separados mediante
+`--cdna` y `--protein`, la herramienta debe utilizar ambos para completar
+la información nucleotídica y proteica del mismo modelo génico.
+
+La asociación entre CDS y proteína debe poder realizarse utilizando los
+identificadores presentes en encabezados NCBI, incluyendo etiquetas como
+`[protein_id=...]`.
 
 **EN:**
-For a nucleotide query, the following fields must be populated:
+If only the FASTA used as the query is provided, the tool must populate
+the fields corresponding to the available sequence type.
+
+For a nucleotide query:
 
 - `gene_id`
 - `length_nt`
 - `cdna_sequence`
 
-while protein fields must remain empty.
-
-For a protein query, the following fields must be populated:
+For a protein query:
 
 - `gene_id`
 - `length_aa`
 - `protein_sequence`
 
-while nucleotide fields must remain empty.
+When separate files are additionally provided through `--cdna` and
+`--protein`, the tool must use both to populate nucleotide and protein
+information for the same gene model.
+
+CDS and protein records must be matchable using identifiers present in
+NCBI headers, including tags such as `[protein_id=...]`.
 
 ---
 
@@ -859,22 +899,70 @@ La tabla final debe almacenarse como un archivo CSV.
 
 **EN:**
 The final results table must be stored as a CSV file.
-
 ### Resultado esperado / Expected Result
 
 **ES:**
-El archivo debe escribirse correctamente, conservar encabezados y
-valores y no incluir el índice interno del DataFrame.
+El archivo debe escribirse en formato CSV siguiendo la estructura tipo
+Dataset S2.
 
-Cuando no se proporcione una ruta mediante `--output`, debe utilizarse
+El CSV debe contener tres filas de cabecera:
+
+1. sección de anotación;
+2. especie o base de datos;
+3. nombre de cada columna.
+
+Cada bloque BLAST debe incluir la sección:
+
+`Annotation based on top-BLAST-hit method`
+
+y los campos:
+
+- `Accesion No.`
+- `Description`
+- `Identity %`
+- `Alignment length`
+- `e-value`
+- `Score`
+
+Las columnas de información de query que estén completamente vacías no
+deben escribirse en el CSV.
+
+Por ejemplo, si solamente existe una query proteica, no deben aparecer
+`Length (nt)` ni `cDNA Sequences (nt)`.
+
+Cuando no se proporcione una ruta de salida debe utilizarse
 `results.csv` como nombre predeterminado.
 
 **EN:**
-The file must be correctly written, preserve headers and values, and
-must not include the internal DataFrame index.
+The file must be written as CSV using the Dataset S2-style structure.
 
-When no path is provided through `--output`, `results.csv` must be used
-as the default filename.
+The CSV must contain three header rows:
+
+1. annotation section;
+2. species or database;
+3. column names.
+
+Each BLAST block must include the section:
+
+`Annotation based on top-BLAST-hit method`
+
+and the fields:
+
+- `Accesion No.`
+- `Description`
+- `Identity %`
+- `Alignment length`
+- `e-value`
+- `Score`
+
+Query information columns that contain no values must not be written
+to the CSV.
+
+For example, when only a protein query is available, `Length (nt)` and
+`cDNA Sequences (nt)` must not appear.
+
+When no output path is provided, `results.csv` must be used as the
+default filename.
 
 ---
 
@@ -913,6 +1001,14 @@ La herramienta debe ejecutar todo el flujo automáticamente.
 También se realizó una prueba manual con datos biológicos reales de
 *Benincasa hispida* y *Cucumis melo*.
 
+El comando también puede recibir opcionalmente:
+
+- `--cdna`: FASTA de secuencias cDNA;
+- `--protein`: FASTA de secuencias proteicas.
+
+Cuando ambos están disponibles, la herramienta debe utilizarlos para
+completar las columnas nucleotídicas y proteicas del bloque de query.
+
 **EN:**
 The user provides:
 
@@ -925,6 +1021,14 @@ The tool must automatically execute the complete workflow.
 
 A manual test was also performed using real biological data from
 *Benincasa hispida* and *Cucumis melo*.
+
+The command may also optionally receive:
+
+- `--cdna`: cDNA FASTA;
+- `--protein`: protein FASTA.
+
+When both are available, the tool must use them to populate both
+nucleotide and protein query columns.
 
 ### Resultado esperado / Expected Result
 

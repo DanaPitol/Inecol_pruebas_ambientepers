@@ -9,6 +9,23 @@ from biocol import (
     list_blast_databases,
     select_blast_program,
 )
+from biocol.blast.databases import infer_database_label
+
+
+def test_infer_database_label_from_ncbi_organism(tmp_path: Path) -> None:
+    faa = tmp_path / "protein.faa"
+    faa.write_text(
+        ">NP_1 MLO-like protein 1 [Cucumis melo]\nMVLSPADKTNVKAAWGKV\n"
+        ">NP_2 kinase [Cucumis melo]\nMVLSPADKTNVKAAWGKV\n",
+        encoding="utf-8",
+    )
+    assert infer_database_label(faa) == "Cucumis melo"
+
+
+def test_infer_database_label_falls_back_to_stem(tmp_path: Path) -> None:
+    faa = tmp_path / "amborella.faa"
+    faa.write_text(">a1\nMVLSPADKTNVKAAWGKV\n", encoding="utf-8")
+    assert infer_database_label(faa) == "amborella"
 
 
 def test_fasta_as_database(fixtures_dir: Path) -> None:

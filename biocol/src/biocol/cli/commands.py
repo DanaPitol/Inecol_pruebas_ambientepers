@@ -26,6 +26,8 @@ def run_from_fasta(args: Namespace) -> Path:
         hits,
         args.accessions,
         query_fasta=args.query,
+        cdna_fasta=args.cdna,
+        protein_fasta=args.protein_fasta,
     )
     return write_results_csv(table, args.output)
 

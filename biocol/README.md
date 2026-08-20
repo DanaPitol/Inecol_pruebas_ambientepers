@@ -80,6 +80,10 @@ Si el tabular no trae columna `database`, se usa el nombre `hit`.
 After `pip install -e ".[dev]"`:
 
 ```bash
+biocol --help
+biocol run --help
+biocol from-blast --help
+
 biocol run --query query.fa --db bases/ --accessions accessions.txt
 biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.csv
 biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna --protein genes.faa
@@ -88,9 +92,9 @@ biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.csv
 ```
 
-`--output` is optional (default: `results.csv`). Help text and errors are in English.
+`--output` is optional (default: `results.csv`). Help, errors, and status lines are in English. Colors are on in an interactive terminal; disable with `--no-color` or `NO_COLOR=1`.
 
-`from-blast` does not take a query FASTA. The species name in the CSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`).
+`from-blast` does not take a query FASTA. The species name in the CSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`). `--accessions` describes **subject** IDs from `--db`, not the query.
 
 ## CSV de salida
 

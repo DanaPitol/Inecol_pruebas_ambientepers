@@ -245,6 +245,44 @@ The user must not need to manually select the BLAST program, except
 when explicitly requesting `tblastx` for a nucleotide-versus-nucleotide
 comparison.
 
+### Prueba de integración con BLAST+ / BLAST+ Integration Test
+
+**ES:**
+Se verificó mediante ejecuciones reales que BIOCOL selecciona y ejecuta
+correctamente los programas BLAST+ de acuerdo con los tipos de secuencia
+de entrada.
+
+| Query | Base de datos | Programa esperado | Resultado |
+|---|---|---|---|
+| Proteína | Proteína | `blastp` | Aprobado |
+| Nucleótido | Nucleótido | `blastn` | Aprobado |
+| Nucleótido | Proteína | `blastx` | Aprobado |
+| Proteína | Nucleótido | `tblastn` | Aprobado |
+| Nucleótido | Nucleótido + `--tblastx` | `tblastx` | Aprobado |
+
+En los cinco escenarios BIOCOL completó el flujo:
+
+`CLI → detección del tipo de secuencia → selección de BLAST → ejecución de BLAST+ → parseo → generación del CSV`
+
+Los archivos CSV se generaron correctamente y conservaron los metadatos
+correspondientes al tipo de query.
+
+**EN:**
+Real BLAST+ executions were used to verify that BIOCOL correctly selects
+and runs the appropriate BLAST program according to the input sequence types.
+
+| Query | Database | Expected program | Result |
+|---|---|---|---|
+| Protein | Protein | `blastp` | Passed |
+| Nucleotide | Nucleotide | `blastn` | Passed |
+| Nucleotide | Protein | `blastx` | Passed |
+| Protein | Nucleotide | `tblastn` | Passed |
+| Nucleotide | Nucleotide + `--tblastx` | `tblastx` | Passed |
+
+In all five scenarios BIOCOL successfully completed the workflow:
+
+`CLI → sequence type detection → BLAST selection → BLAST+ execution → parsing → CSV generation`
+
 ---
 
 ## CP-08 - Base de datos inexistente o inválida / Missing or Invalid Database

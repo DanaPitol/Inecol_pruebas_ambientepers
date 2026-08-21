@@ -32,6 +32,11 @@ def main(argv: list[str] | None = None) -> int:
     enable_windows_vt()
 
     parser = build_parser()
+    stripped = [item for item in argv_list if item != "--no-color"]
+    if not stripped:
+        parser.print_help()
+        print("error: a command is required (run or from-blast)", file=sys.stderr)
+        return 2
     args = parser.parse_args(argv_list)
     try:
         output = _COMMANDS[args.command](args)

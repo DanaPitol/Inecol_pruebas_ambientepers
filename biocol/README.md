@@ -86,7 +86,7 @@ biocol from-blast --help
 
 biocol run --query query.fa --db bases/ --accessions accessions.txt
 biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.csv
-biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna --protein genes.faa
+biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna
 
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.csv
@@ -106,7 +106,7 @@ CSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No h
 
 No se incluyen Length (aa) ni secuencia del hit. Sin hit o sin descriptor: `---`.
 
-Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Si hay modelos de gen, se pueden pasar ambos FASTA (`--cdna` y `--protein`) y el primer bloque queda completo.
+Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Con `--cdna` (CDS de la query) el primer bloque queda con nucleótido y, si `--query` es proteína, también con aminoácidos.
 
 Una fila por query y rango de hit (se conservan todos los hits). En Excel, importar el CSV y opcionalmente combinar celdas de las dos primeras filas.
 

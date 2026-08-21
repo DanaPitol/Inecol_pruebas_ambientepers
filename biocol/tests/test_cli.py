@@ -56,13 +56,15 @@ def test_top_help_lists_commands_and_use_cases(capsys) -> None:
     else:
         raise AssertionError("expected SystemExit from --help")
     text = capsys.readouterr().out
-    assert "Usage:" in text or "usage:" in text
+    assert "BIOCOL" in text
+    assert "WORKFLOWS" in text
+    assert "QUICK START" in text
     assert "run" in text
     assert "from-blast" in text
-    assert "Typical use cases" in text
-    assert "biocol run --query" in text
+    assert "biocol run" in text
     assert "--no-color" in text
     assert "\033[" not in text
+    assert "SUBJECT" in text
 
 
 def test_run_help_documents_gene_models(capsys) -> None:
@@ -73,7 +75,22 @@ def test_run_help_documents_gene_models(capsys) -> None:
     else:
         raise AssertionError("expected SystemExit from --help")
     text = capsys.readouterr().out
+    assert "PROGRAM SELECTION" in text
     assert "--cdna" in text
-    assert "--protein" in text
+    assert "--protein" not in text
     assert "blastp" in text
     assert "SUBJECT" in text
+    assert "BIOCOL" in text
+
+
+def test_from_blast_help_documents_outfmt6(capsys) -> None:
+    try:
+        main(["--no-color", "from-blast", "--help"])
+    except SystemExit as exc:
+        assert exc.code == 0
+    else:
+        raise AssertionError("expected SystemExit from --help")
+    text = capsys.readouterr().out
+    assert "from-blast" in text
+    assert "--blast" in text
+    assert "outfmt 6" in text

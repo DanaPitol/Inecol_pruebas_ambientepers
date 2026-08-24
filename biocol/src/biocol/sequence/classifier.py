@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
+from collections import Counter
 from collections.abc import Iterable
 
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from biocol.exceptions import MixedSequenceTypeError
 from biocol.sequence.alphabets import (
     GAP_LETTERS,
     NUCLEOTIDE_LETTERS,
@@ -36,13 +36,7 @@ def _sequence_id(sequence: SequenceLike) -> str:
 
 def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
     """Clasifica una secuencia como ``nucleotide`` o ``protein``.
-
-    Usa ``Bio.Data.IUPACData``. El ARN (U) cuenta como nucleótido.
-
-    Las letras solo proteicas (E, F, I, L, P, Q, ...) marcan proteína.
-    Los códigos de ambigüedad nucleotídica (K, R, Y, ...) también son
-    aminoácidos: sin al menos una base inequívoca (A, C, G, T o U) la
-    secuencia se trata como proteína (p. ej. poli-lisina ``KKK…``).
+    Usa ``Bio.Data.IUPACData``.
     """
     residues = _residues(sequence)
     if not residues:
@@ -67,23 +61,30 @@ def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
 
 
 def detect_query_type(records: Iterable[SequenceLike]) -> SequenceType:
-    """Tipo de query de un FASTA completo.
+    """Tipo de un FASTA completo: el tipo mayoritario.
 
-    Todas las secuencias deben ser del mismo tipo; si no, se lanza error.
+    Si hay secuencias clasificadas distinto (p. ej. péptidos cortos que
+    parecen ADN), no se aborta: se usa proteína en empate.
     """
     records_list = list(records)
     types = [detect_sequence_type(record) for record in records_list]
-    unique = set(types) #guarda los tipos de secuencias en un conjunto
-    if len(unique) > 1:
-        logger.info(
-            "detect_query_type: FASTA mixto tipos=%s ids=%s",
-            types,
-            [_sequence_id(record) for record in records_list],
+    counts = Counter(types)
+    protein_n = counts.get("protein", 0)
+    nucleotide_n = counts.get("nucleotide", 0)
+    query_type = "protein" if protein_n >= nucleotide_n else "nucleotide"
+    if len(counts) > 1:
+        minority_ids = [
+            _sequence_id(record)
+            for record, seq_type in zip(records_list, types, strict=True)
+            if seq_type != query_type
+        ]
+        logger.debug(
+            "detect_query_type: FASTA mixto; se usa %s (protein=%s nucleotide=%s) ids minoría=%s",
+            query_type,
+            protein_n,
+            nucleotide_n,
+            minority_ids[:20],
         )
-        raise MixedSequenceTypeError(
-            "FASTA mixes nucleotide and protein sequences"
-        )
-    query_type = types[0]
     logger.info(
         "detect_query_type: FASTA clasificado como %s (%s secuencias)",
         query_type,

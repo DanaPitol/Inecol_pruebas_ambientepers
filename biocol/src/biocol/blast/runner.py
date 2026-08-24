@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 _DBTYPE = {"nucleotide": "nucl", "protein": "prot"}
 DEFAULT_MAX_TARGET_SEQS = 3
+DEFAULT_NUM_THREADS = 40
 
 
 def build_makeblastdb_command(
@@ -46,7 +47,7 @@ def build_blast_command(
     *,
     evalue: float = 10,
     max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
-    num_threads: int = 1,
+    num_threads: int = DEFAULT_NUM_THREADS,
 ) -> list[str]:
     return [
         program,
@@ -93,7 +94,7 @@ def run_blast(
     translated: bool = False,
     evalue: float = 10,
     max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
-    num_threads: int = 1,
+    num_threads: int = DEFAULT_NUM_THREADS,
 ) -> pd.DataFrame:
     """Ejecuta BLAST+ (un run por FASTA de base) y parsea outfmt 6.
 

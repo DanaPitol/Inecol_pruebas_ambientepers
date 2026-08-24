@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_OUTPUT
+from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -73,8 +73,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--threads",
         type=int,
-        default=1,
-        help="BLAST+ CPU threads (default: 1)",
+        default=DEFAULT_NUM_THREADS,
+        help=f"BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS})",
     )
 
     from_blast = subparsers.add_parser(

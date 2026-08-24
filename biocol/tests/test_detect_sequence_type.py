@@ -4,7 +4,6 @@ import pytest
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
-from biocol.exceptions import MixedSequenceTypeError
 from biocol.sequence.classifier import detect_query_type, detect_sequence_type
 from biocol.sequence.reader import read_fasta
 
@@ -47,10 +46,18 @@ def test_detect_multifasta_same_type(fixtures_dir: Path) -> None:
     assert detect_query_type(records) == "nucleotide"
 
 
-def test_mixed_multifasta_raises(fixtures_dir: Path) -> None:
+def test_mixed_multifasta_uses_majority(fixtures_dir: Path) -> None:
     records = read_fasta(fixtures_dir / "mixed.fa")
-    with pytest.raises(MixedSequenceTypeError):
-        detect_query_type(records)
+    assert detect_query_type(records) == "protein"
+
+
+def test_mixed_fasta_nucleotide_majority() -> None:
+    records = [
+        SeqRecord(Seq("ATGCGATCGTAGCTAG"), id="n1"),
+        SeqRecord(Seq("ATGCGATCGTAGCTAG"), id="n2"),
+        SeqRecord(Seq("MVLSPADKTNVKAAWGKV"), id="p1"),
+    ]
+    assert detect_query_type(records) == "nucleotide"
 
 
 def test_poly_lysine_is_protein_not_nucleotide() -> None:

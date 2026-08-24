@@ -2,6 +2,7 @@
 
 from biocol.blast import (
     DEFAULT_MAX_TARGET_SEQS,
+    DEFAULT_NUM_THREADS,
     detect_database_type,
     list_blast_databases,
     parse_blast_results,
@@ -33,6 +34,7 @@ __all__ = [
     "BlastError",
     "BlastExecutionError",
     "DEFAULT_MAX_TARGET_SEQS",
+    "DEFAULT_NUM_THREADS",
     "DEFAULT_OUTPUT",
     "DatabaseError",
     "EmptyFastaError",

@@ -130,7 +130,7 @@ from biocol import (
 )
 ```
 
-`detect_sequence_type()` acepta `str`, `Bio.Seq.Seq` o `SeqRecord`. `detect_query_type()` clasifica un FASTA completo (error si está mixto).
+`detect_sequence_type()` acepta `str`, `Bio.Seq.Seq` o `SeqRecord`. `detect_query_type()` clasifica un FASTA completo por el tipo mayoritario (en empate, proteína).
 
 Errores: `FastaError`, `EmptyFastaError`, `InvalidFastaError`, `MixedSequenceTypeError`, `BlastError`, `DatabaseError`, `MixedDatabaseTypeError`, `BlastExecutionError`, `MetadataError`.
 
@@ -151,7 +151,7 @@ Al correr Pytest se muestran logs INFO. Fixtures en `tests/fixtures/` (FASTA, BL
 | FASTA de ARN | `nucleotide` |
 | FASTA de proteína | `protein` |
 | Multifasta del mismo tipo | tipo único |
-| Multifasta mixto ADN + proteína | `MixedSequenceTypeError` |
+| Multifasta mixto ADN + proteína | tipo mayoritario (empate → proteína) |
 | Ruta inexistente | `FileNotFoundError` |
 | Extensión no FASTA (p. ej. `.txt`) | `InvalidFastaError` |
 | Archivo vacío / sin secuencias | `EmptyFastaError` |

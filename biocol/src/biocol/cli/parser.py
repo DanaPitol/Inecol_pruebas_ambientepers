@@ -11,7 +11,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="biocol",
         description=(
-            "Build a BLAST annotation CSV from a FASTA query and databases, "
+            "Build a BLAST annotation TSV from a FASTA query and databases, "
             "or from an existing BLAST tabular file."
         ),
     )
@@ -19,10 +19,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = subparsers.add_parser(
         "run",
-        help="Path 1: FASTA + databases → BLAST+ → CSV",
+        help="Path 1: FASTA + databases → BLAST+ → TSV",
         description=(
             "Run BLAST+ on a FASTA query against one FASTA file or a folder "
-            "of FASTA files, join accession descriptors, and write the CSV."
+            "of FASTA files, join accession descriptors, and write the TSV."
         ),
     )
     run.add_argument("--query", required=True, help="Query FASTA / multifasta used for BLAST")
@@ -50,7 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--output",
         default=None,
-        help=f"Output CSV path (default: {DEFAULT_OUTPUT})",
+        help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     run.add_argument(
         "--tblastx",
@@ -79,10 +79,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     from_blast = subparsers.add_parser(
         "from-blast",
-        help="Path 2: existing BLAST tabular + accessions → CSV",
+        help="Path 2: existing BLAST tabular + accessions → TSV",
         description=(
             "Parse a BLAST outfmt 6 text file, join accession descriptors, "
-            "and write the same CSV as path 1. Sequence columns are left empty. "
+            "and write the same TSV as path 1. Sequence columns are left empty. "
             "The species/database block name is taken from the accessions filename "
             "(e.g. Benincasa_hispida_gd.txt → Benincasa_hispida_gd)."
         ),
@@ -100,6 +100,6 @@ def build_parser() -> argparse.ArgumentParser:
     from_blast.add_argument(
         "--output",
         default=None,
-        help=f"Output CSV path (default: {DEFAULT_OUTPUT})",
+        help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     return parser

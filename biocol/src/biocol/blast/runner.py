@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 _DBTYPE = {"nucleotide": "nucl", "protein": "prot"}
 DEFAULT_MAX_TARGET_SEQS = 3
-DEFAULT_NUM_THREADS = 40
+DEFAULT_NUM_THREADS = 1
 
 
 def build_makeblastdb_command(

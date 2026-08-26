@@ -52,7 +52,7 @@ def test_load_accessions_empty_raises(tmp_path: Path) -> None:
         load_accessions(empty)
 
 
-def test_wide_table_all_hits_and_descriptions(fixtures_dir: Path) -> None:
+def test_wide_table_best_hit_and_descriptions(fixtures_dir: Path) -> None:
     table = build_result_table(
         _hits(),
         fixtures_dir / "accessions.txt",
@@ -61,7 +61,7 @@ def test_wide_table_all_hits_and_descriptions(fixtures_dir: Path) -> None:
     assert list(table.columns[:5]) == QUERY_COLUMNS
     assert "amborella_accession" in table.columns
     assert "vitis_description" in table.columns
-    assert len(table) == 2
+    assert len(table) == 1
 
     best = table.iloc[0]
     assert best["gene_id"] == "seq1"
@@ -73,12 +73,6 @@ def test_wide_table_all_hits_and_descriptions(fixtures_dir: Path) -> None:
     assert best["amborella_description"] == "Amborella protein one"
     assert best["vitis_accession"] == "XP_002.1"
     assert best["vitis_description"] == "Vitis protein two"
-
-    second = table.iloc[1]
-    assert second["amborella_accession"] == "NO_MATCH.1"
-    assert second["amborella_description"] == "---"
-    assert second["vitis_accession"] == "---"
-    assert second["vitis_description"] == "---"
 
 
 def test_protein_fasta_fills_aa_only(fixtures_dir: Path) -> None:
@@ -113,7 +107,7 @@ def test_write_results_csv_default_name(tmp_path: Path, fixtures_dir: Path, monk
     path = write_results_csv(table)
     assert path.name == DEFAULT_OUTPUT
     assert path.exists()
-    loaded = pd.read_csv(path, header=None)
+    loaded = pd.read_csv(path, header=None, sep="\t")
     section = loaded.iloc[0].astype(str).tolist()
     assert section.count("Annotation based on top-BLAST-hit method") == 2
     assert "Accesion No." in set(loaded.iloc[2].astype(str))
@@ -131,8 +125,8 @@ def test_write_results_csv_drops_empty_nucleotide_columns(tmp_path: Path, fixtur
         fixtures_dir / "accessions.txt",
         query_fasta=fixtures_dir / "protein.fa",
     )
-    path = write_results_csv(table, tmp_path / "prot.csv")
-    labels = pd.read_csv(path, header=None).iloc[2].astype(str).tolist()
+    path = write_results_csv(table, tmp_path / "prot.tsv")
+    labels = pd.read_csv(path, header=None, sep="\t").iloc[2].astype(str).tolist()
     assert "Gene ID" in labels
     assert "Length(aa)" in labels
     assert "Protein Sequences (aa)" in labels

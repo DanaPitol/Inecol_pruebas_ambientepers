@@ -6,7 +6,7 @@ import pandas as pd
 
 from biocol.processing.table import QUERY_COLUMNS
 
-DEFAULT_OUTPUT = "results.csv"
+DEFAULT_OUTPUT = "results.tsv"
 
 QUERY_LABELS = {
     "gene_id": "Gene ID",
@@ -54,7 +54,7 @@ def _hit_prefix_and_field(column: str) -> tuple[str, str] | None:
 
 
 def format_s2_csv(table: pd.DataFrame) -> pd.DataFrame:
-    """CSV con cabecera de 3 filas, bloques por especie, como Dataset S2."""
+    """Tabla con cabecera de 3 filas, bloques por especie, como Dataset S2."""
     frame = drop_empty_query_columns(table)
     query_cols = [column for column in QUERY_COLUMNS if column in frame.columns]
     hit_cols = [column for column in frame.columns if column not in QUERY_COLUMNS]
@@ -99,9 +99,9 @@ def write_results_csv(
     table: pd.DataFrame,
     output: str | Path | None = None,
 ) -> Path:
-    """Escribe el CSV final estilo Dataset S2. Por defecto ``results.csv``."""
+    """Escribe el TSV final estilo Dataset S2. Por defecto ``results.tsv``."""
     path = Path(output) if output else Path(DEFAULT_OUTPUT)
-    if path.suffix.lower() != ".csv":
-        path = path.with_suffix(".csv")
-    format_s2_csv(table).to_csv(path, index=False, header=False)
+    if path.suffix.lower() != ".tsv":
+        path = path.with_suffix(".tsv")
+    format_s2_csv(table).to_csv(path, index=False, header=False, sep="\t")
     return path

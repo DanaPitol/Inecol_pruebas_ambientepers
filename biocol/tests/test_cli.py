@@ -5,8 +5,8 @@ import pandas as pd
 from biocol.cli import main
 
 
-def test_from_blast_writes_csv(tmp_path: Path, fixtures_dir: Path) -> None:
-    output = tmp_path / "out.csv"
+def test_from_blast_writes_tsv(tmp_path: Path, fixtures_dir: Path) -> None:
+    output = tmp_path / "out.tsv"
     code = main(
         [
             "from-blast",
@@ -20,7 +20,7 @@ def test_from_blast_writes_csv(tmp_path: Path, fixtures_dir: Path) -> None:
     )
     assert code == 0
     assert output.exists()
-    table = pd.read_csv(output, header=2)
+    table = pd.read_csv(output, header=2, sep="\t")
     assert "Gene ID" in table.columns
     assert "Accesion No." in table.columns
     assert "q1" in set(table["Gene ID"].astype(str))

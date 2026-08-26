@@ -1,6 +1,6 @@
 # biocol
 
-Backend de la herramienta BLAST de INECOL. Toma una query FASTA (o un BLAST tabular ya existente), la compara contra bases FASTA locales y escribe un **CSV plano** de anotación.
+Backend de la herramienta BLAST de INECOL. Toma una query FASTA (o un BLAST tabular ya existente), la compara contra bases FASTA locales y escribe un **TSV plano** de anotación.
 
 
 ## Requisitos
@@ -25,7 +25,7 @@ pip install -e ".[dev]"
 | Accesiones | Texto `accession<TAB>descriptor`, sin encabezado. |
 | BLAST tabular (camino 2) | `outfmt 6` estándar (12 columnas NCBI). |
 
-Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **3**.
+Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **3**, `threads` default **1**. El TSV muestra solo el **mejor hit** por query y especie.
 
 ## Cómo se elige el programa BLAST
 
@@ -41,7 +41,7 @@ Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` 
 
 ## Uso
 
-Hay dos caminos al mismo CSV.
+Hay dos caminos al mismo TSV.
 
 ### Camino 1 — FASTA + bases
 
@@ -56,7 +56,7 @@ hits = run_blast(
     max_target_seqs=3,
 )
 table = build_result_table(hits, "accessions.txt", query_fasta="query.fa")
-write_results_csv(table, "results.csv")  # si se omite, usa results.csv
+write_results_csv(table, "results.tsv")  # si se omite, usa results.tsv
 ```
 
 `run_blast` crea bases temporales con `makeblastdb`, lanza un BLAST por FASTA y parsea `outfmt 6`. Si una query no tiene hit en una base, queda una fila vacía.
@@ -81,20 +81,20 @@ After `pip install -e ".[dev]"`:
 
 ```bash
 biocol run --query query.fa --db bases/ --accessions accessions.txt
-biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.csv
+biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.tsv
 biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna --protein genes.faa
 
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt
-biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.csv
+biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.tsv
 ```
 
-`--output` is optional (default: `results.csv`). Help text and errors are in English.
+`--output` is optional (default: `results.tsv`). Help text and errors are in English.
 
-`from-blast` does not take a query FASTA. The species name in the CSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`).
+`from-blast` does not take a query FASTA. The species name in the TSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`).
 
-## CSV de salida
+## TSV de salida
 
-CSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No hay celdas combinadas: el nombre de sección y el de la especie se repiten o quedan en la primera columna de cada bloque.
+TSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No hay celdas combinadas: el nombre de sección y el de la especie se repiten o quedan en la primera columna de cada bloque.
 
 1. Sección: vacío en query; `Annotation based on top-BLAST-hit method` en cada bloque BLAST.
 2. Especie: `stem` del FASTA de base (p. ej. `protein`, `amborella`).
@@ -104,7 +104,7 @@ No se incluyen Length (aa) ni secuencia del hit. Sin hit o sin descriptor: `---`
 
 Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Si hay modelos de gen, se pueden pasar ambos FASTA (`--cdna` y `--protein`) y el primer bloque queda completo.
 
-Una fila por query y rango de hit (se conservan todos los hits). En Excel, importar el CSV y opcionalmente combinar celdas de las dos primeras filas.
+Una fila por query (solo el mejor hit por especie). En Excel, importar el TSV y opcionalmente combinar celdas de las dos primeras filas.
 
 ## API pública
 
@@ -172,7 +172,7 @@ src/biocol/           backend
   blast/              tipo de base, selección, ejecución y parseo tabular
   metadata/           accesiones y descriptores
   processing/         tabla ancha de resultados
-  output/             escritura del CSV
+  output/             escritura del TSV
   cli/                CLI (argparse + comandos run / from-blast)
 tests/                pruebas (pytest)
 tests/fixtures/       FASTA, BLAST outfmt 6 y accesiones de ejemplo

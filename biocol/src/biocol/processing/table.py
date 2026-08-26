@@ -147,8 +147,8 @@ def build_result_table(
 ) -> pd.DataFrame:
     """Tabla ancha estilo Dataset S2 (sin Pfam/KEGG/GO).
 
-    Una fila por query y rango de hit. Cada FASTA de base aporta un bloque
-    de columnas. Se conservan todos los hits.
+    Una fila por query con el mejor hit de cada base (menor e-value,
+    mayor score). BLAST puede devolver más sujetos; aquí solo se muestra el top 1.
     """
     accessions = load_accessions(accessions_path)
     hits = blast_hits.copy()
@@ -189,12 +189,8 @@ def build_result_table(
         protein_fasta=protein_fasta,
     )
 
-    max_rank_by_query = (
-        hits.groupby("qseqid")["hit_rank"].max().to_dict() if not hits.empty else {}
-    )
     table_rows: list[dict] = []
     for query_id in query_ids:
-        max_rank = int(max_rank_by_query.get(query_id, 1) or 1)
         base = query_meta.loc[query_meta["gene_id"] == query_id]
         query_row = base.iloc[0].to_dict() if not base.empty else {
             "gene_id": query_id,
@@ -203,31 +199,30 @@ def build_result_table(
             "length_aa": pd.NA,
             "protein_sequence": pd.NA,
         }
-        for rank in range(1, max_rank + 1):
-            row = {column: query_row[column] for column in QUERY_COLUMNS}
-            for database in databases:
-                prefix = _safe_name(str(database))
-                match = hits[
-                    (hits["qseqid"] == query_id)
-                    & (hits["database"].astype(str) == str(database))
-                    & (hits["hit_rank"] == rank)
-                ]
-                for field, source in HIT_FIELDS:
-                    column = f"{prefix}_{field}"
-                    if match.empty:
-                        row[column] = "---" if field in {"accession", "description"} else pd.NA
-                    else:
-                        value = match.iloc[0][source]
-                        if field == "accession":
-                            if pd.isna(value) or str(value) == "":
-                                row[column] = "---"
-                            else:
-                                row[column] = normalize_accession(value) or str(value)
-                        elif field == "description":
-                            row[column] = value if value else "---"
+        row = {column: query_row[column] for column in QUERY_COLUMNS}
+        for database in databases:
+            prefix = _safe_name(str(database))
+            match = hits[
+                (hits["qseqid"] == query_id)
+                & (hits["database"].astype(str) == str(database))
+                & (hits["hit_rank"] == 1)
+            ]
+            for field, source in HIT_FIELDS:
+                column = f"{prefix}_{field}"
+                if match.empty:
+                    row[column] = "---" if field in {"accession", "description"} else pd.NA
+                else:
+                    value = match.iloc[0][source]
+                    if field == "accession":
+                        if pd.isna(value) or str(value) == "":
+                            row[column] = "---"
                         else:
-                            row[column] = value
-            table_rows.append(row)
+                            row[column] = normalize_accession(value) or str(value)
+                    elif field == "description":
+                        row[column] = value if value else "---"
+                    else:
+                        row[column] = value
+        table_rows.append(row)
 
     table = pd.DataFrame(table_rows)
     logger.info("build_result_table: %s filas, %s columnas", len(table), table.shape[1])

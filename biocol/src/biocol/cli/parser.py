@@ -3,64 +3,102 @@
 from __future__ import annotations
 
 import argparse
+import sys
 
 from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
+from biocol.cli.helptext import render_from_blast_help, render_run_help, render_top_help
+from biocol.cli.style import BOLD, RED, paint
+
+
+class _HelpParser(argparse.ArgumentParser):
+    """argparse parser that prints the custom BIOCOL help screens."""
+
+    def __init__(self, *args, help_renderer=None, **kwargs) -> None:
+        self._help_renderer = help_renderer
+        super().__init__(*args, **kwargs)
+
+    def format_help(self) -> str:
+        if self._help_renderer is not None:
+            return self._help_renderer()
+        return super().format_help()
+
+    def error(self, message: str) -> None:
+        sys.stderr.write(self.format_help())
+        sys.stderr.write(paint(f"\nerror: {message}\n", BOLD, RED, stream=sys.stderr))
+        self.exit(2)
+
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _HelpParser(
         prog="biocol",
-        description=(
-            "Build a BLAST annotation TSV from a FASTA query and databases, "
-            "or from an existing BLAST tabular file."
-        ),
+        add_help=True,
+        help_renderer=render_top_help,
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable ANSI colors in help, errors, and status lines",
+    )
+    subparsers = parser.add_subparsers(
+        dest="command",
+        required=True,
+        metavar="COMMAND",
+        parser_class=_HelpParser,
+    )
 
     run = subparsers.add_parser(
         "run",
-        help="Path 1: FASTA + databases → BLAST+ → TSV",
-        description=(
-            "Run BLAST+ on a FASTA query against one FASTA file or a folder "
-            "of FASTA files, join accession descriptors, and write the TSV."
-        ),
+        help="FASTA + databases → BLAST+ → TSV",
+        help_renderer=render_run_help,
     )
-    run.add_argument("--query", required=True, help="Query FASTA / multifasta used for BLAST")
+    run.add_argument(
+        "--query",
+        required=True,
+        metavar="FASTA",
+        help="Query FASTA / multifasta used for BLAST (all records same type)",
+    )
     run.add_argument(
         "--cdna",
         default=None,
-        help="Optional cDNA FASTA (gene models): fills Length (nt) and cDNA columns",
+        metavar="FASTA",
+        help="Optional query CDS FASTA: Length (nt) and cDNA columns",
     )
     run.add_argument(
         "--protein",
         default=None,
         dest="protein_fasta",
+        metavar="FASTA",
         help="Optional protein FASTA (gene models): fills Length(aa) and protein columns",
     )
     run.add_argument(
         "--db",
         required=True,
-        help="Subject FASTA file or folder of FASTA files (subfolders included)",
+        metavar="PATH",
+        help="Subject FASTA file, or folder of FASTA files (same type; subfolders included)",
     )
     run.add_argument(
         "--accessions",
         required=True,
-        help="Tab-separated file: accession<TAB>descriptor (no header)",
+        metavar="FILE",
+        help="TSV of SUBJECT hits: accession<TAB>descriptor (no header). Missing ids → ---",
     )
     run.add_argument(
         "--output",
         default=None,
+        metavar="TSV",
         help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     run.add_argument(
         "--tblastx",
         action="store_true",
-        help="When query and database are both nucleotide, use tblastx instead of blastn",
+        help="If query and database are both nucleotide, use tblastx instead of blastn",
     )
     run.add_argument(
         "--evalue",
         type=float,
         default=10,
+        metavar="N",
         help="BLAST E-value threshold (default: 10)",
     )
     run.add_argument(
@@ -68,38 +106,38 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=DEFAULT_MAX_TARGET_SEQS,
         dest="max_target_seqs",
-        help=f"Maximum aligned sequences to keep (default: {DEFAULT_MAX_TARGET_SEQS})",
+        metavar="N",
+        help=f"Maximum aligned sequences to keep per query (default: {DEFAULT_MAX_TARGET_SEQS})",
     )
     run.add_argument(
         "--threads",
         type=int,
         default=DEFAULT_NUM_THREADS,
+        metavar="N",
         help=f"BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS})",
     )
 
     from_blast = subparsers.add_parser(
         "from-blast",
-        help="Path 2: existing BLAST tabular + accessions → TSV",
-        description=(
-            "Parse a BLAST outfmt 6 text file, join accession descriptors, "
-            "and write the same TSV as path 1. Sequence columns are left empty. "
-            "The species/database block name is taken from the accessions filename "
-            "(e.g. Benincasa_hispida_gd.txt → Benincasa_hispida_gd)."
-        ),
+        help="Existing BLAST tabular + accessions → TSV (no BLAST+)",
+        help_renderer=render_from_blast_help,
     )
     from_blast.add_argument(
         "--blast",
         required=True,
-        help="BLAST tabular file (outfmt 6, .txt)",
+        metavar="FILE",
+        help="BLAST tabular file (outfmt 6, typically .txt)",
     )
     from_blast.add_argument(
         "--accessions",
         required=True,
-        help="Tab-separated file: accession<TAB>descriptor (no header)",
+        metavar="FILE",
+        help="TSV of SUBJECT hits: accession<TAB>descriptor (no header)",
     )
     from_blast.add_argument(
         "--output",
         default=None,
+        metavar="TSV",
         help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     return parser

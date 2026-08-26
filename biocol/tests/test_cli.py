@@ -39,10 +39,16 @@ def test_from_blast_missing_file_returns_error(tmp_path: Path) -> None:
     assert code == 1
 
 
-def test_run_help_is_english() -> None:
+def test_run_help_is_english(capsys) -> None:
     try:
-        main(["run", "--help"])
+        main(["--no-color", "run", "--help"])
     except SystemExit as exc:
         assert exc.code == 0
     else:
         raise AssertionError("expected SystemExit from --help")
+    text = capsys.readouterr().out
+    assert "BIOCOL" in text
+    assert "PROGRAM SELECTION" in text
+    assert "--protein" in text
+    assert "results.tsv" in text
+    assert "\\033[" not in text

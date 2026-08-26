@@ -59,7 +59,7 @@ _CDS_ACCESSION = re.compile(r"_cds_([A-Z]{1,3}_?\d+(?:\.\d+)?)", re.IGNORECASE)
 
 
 def _record_lookup_keys(record) -> list[str]:
-    """IDs con los que se puede cruzar un FASTA NCBI CDS con un .faa."""
+    """IDs that can join an NCBI CDS FASTA with a .faa file."""
     keys = [record.id, normalize_accession(record.id)]
     description = record.description or ""
     tagged = _PROTEIN_ID_TAG.search(description)
@@ -145,11 +145,12 @@ def build_result_table(
     cdna_fasta: str | Path | None = None,
     protein_fasta: str | Path | None = None,
 ) -> pd.DataFrame:
-    """Tabla ancha estilo Dataset S2 (sin Pfam/KEGG/GO).
+    """Wide Dataset S2-style table (no Pfam/KEGG/GO).
 
-    Una fila por query con el mejor hit de cada base (menor e-value,
-    mayor score). BLAST puede devolver más sujetos; aquí solo se muestra el top 1.
+    One row per query with the best hit per database (lowest e-value,
+    highest score). BLAST may return more subjects; only the top hit is shown.
     """
+    logger.info("Joining BLAST hits with accession descriptors")
     accessions = load_accessions(accessions_path)
     hits = blast_hits.copy()
     if hits.empty:
@@ -225,5 +226,9 @@ def build_result_table(
         table_rows.append(row)
 
     table = pd.DataFrame(table_rows)
-    logger.info("build_result_table: %s filas, %s columnas", len(table), table.shape[1])
+    logger.info(
+        "Built result table: %s gene(s), %s column(s) (best hit per species)",
+        len(table),
+        table.shape[1],
+    )
     return table

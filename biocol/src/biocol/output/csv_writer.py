@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pandas as pd
 
 from biocol.processing.table import QUERY_COLUMNS
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_OUTPUT = "results.tsv"
 
@@ -36,7 +39,7 @@ def _column_has_values(series: pd.Series) -> bool:
 
 
 def drop_empty_query_columns(table: pd.DataFrame) -> pd.DataFrame:
-    """Quita columnas de query que no tienen datos (p. ej. cDNA si la query es proteína)."""
+    """Drop query columns that have no data (e.g. cDNA when the query is protein)."""
     keep = []
     for column in table.columns:
         if column in QUERY_COLUMNS and column != "gene_id" and not _column_has_values(table[column]):
@@ -54,7 +57,7 @@ def _hit_prefix_and_field(column: str) -> tuple[str, str] | None:
 
 
 def format_s2_csv(table: pd.DataFrame) -> pd.DataFrame:
-    """Tabla con cabecera de 3 filas, bloques por especie, como Dataset S2."""
+    """Table with a 3-row header and per-species blocks, Dataset S2 style."""
     frame = drop_empty_query_columns(table)
     query_cols = [column for column in QUERY_COLUMNS if column in frame.columns]
     hit_cols = [column for column in frame.columns if column not in QUERY_COLUMNS]
@@ -99,9 +102,10 @@ def write_results_csv(
     table: pd.DataFrame,
     output: str | Path | None = None,
 ) -> Path:
-    """Escribe el TSV final estilo Dataset S2. Por defecto ``results.tsv``."""
+    """Write the Dataset S2-style TSV. Defaults to ``results.tsv``."""
     path = Path(output) if output else Path(DEFAULT_OUTPUT)
     if path.suffix.lower() != ".tsv":
         path = path.with_suffix(".tsv")
     format_s2_csv(table).to_csv(path, index=False, header=False, sep="\t")
+    logger.info("Wrote TSV: %s", path)
     return path

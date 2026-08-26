@@ -19,11 +19,11 @@ def select_blast_program(
     *,
     translated: bool = False,
 ) -> str:
-    """Elige blastn, blastp, blastx, tblastn o tblastx.
+    """Choose blastn, blastp, blastx, tblastn, or tblastx.
 
-    Si query y base son nucleótido, el valor por defecto es blastn.
-    ``translated=True`` (opción explícita, desactivada por defecto) elige tblastx.
-    En las demás combinaciones ``translated`` se ignora.
+    If query and database are nucleotide, the default is blastn.
+    ``translated=True`` (explicit option, off by default) selects tblastx.
+    In other combinations ``translated`` is ignored.
     """
     if query_type not in {"nucleotide", "protein"}:
         raise BlastError(f"Unsupported query type: {query_type}")
@@ -36,7 +36,7 @@ def select_blast_program(
     else:
         program = _DIRECT_PROGRAMS[(query_type, database_type)]
 
-    logger.info(
+    logger.debug(
         "select_blast_program: query=%s db=%s translated=%s → %s",
         query_type,
         database_type,

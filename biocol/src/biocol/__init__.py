@@ -1,4 +1,4 @@
-"""Backend para lectura de FASTA, BLAST y construcción de la tabla de resultados."""
+"""Backend for FASTA reading, BLAST, and result table construction."""
 
 from biocol.blast import (
     DEFAULT_MAX_TARGET_SEQS,

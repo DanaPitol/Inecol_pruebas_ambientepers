@@ -19,9 +19,9 @@ _ORGANISM_BRACKET = re.compile(r"\[([^\]]+)\]\s*$")
 
 
 def infer_database_label(fasta_path: Path, sample: int = 40) -> str:
-    """Nombre de especie/base: organismo en headers NCBI ``[Genus species]``.
+    """Species/database name: organism from NCBI headers ``[Genus species]``.
 
-    Si no hay un organismo mayoritario, usa el stem del archivo FASTA.
+    If there is no majority organism, use the FASTA file stem.
     """
     organisms: list[str] = []
     with fasta_path.open(encoding="utf-8", errors="replace") as handle:
@@ -34,7 +34,7 @@ def infer_database_label(fasta_path: Path, sample: int = 40) -> str:
     if organisms:
         name, count = Counter(organisms).most_common(1)[0]
         if count >= max(1, (len(organisms) + 1) // 2):
-            logger.info("infer_database_label: %s → %s", fasta_path.name, name)
+            logger.debug("infer_database_label: %s → %s", fasta_path.name, name)
             return name
     return fasta_path.stem
 
@@ -58,21 +58,24 @@ def _iter_fasta_in_directory(directory: Path) -> list[Path]:
 
 
 def list_blast_databases(source: str | Path) -> list[tuple[Path, SequenceType]]:
-    """Resuelve un FASTA o una carpeta (incluye subcarpetas).
+    """Resolve a FASTA file or a folder (including subfolders).
 
-    Devuelve pares ``(ruta, tipo)``.
+    Returns ``(path, type)`` pairs.
     """
     raw = Path(source)
 
     if raw.is_dir():
+        logger.info("Scanning FASTA databases in folder: %s", raw)
         fasta_files = _iter_fasta_in_directory(raw)
         if not fasta_files:
             raise DatabaseError(
                 f"Folder contains no FASTA files ({', '.join(sorted(FASTA_EXTENSIONS))}): {raw}"
             )
+        logger.info("Found %s FASTA database file(s)", len(fasta_files))
         return [(path, _type_from_fasta(path)) for path in fasta_files]
 
     if _is_fasta_file(raw):
+        logger.info("Using FASTA database: %s", raw)
         return [(raw, _type_from_fasta(raw))]
 
     if raw.is_file():
@@ -87,17 +90,17 @@ def list_blast_databases(source: str | Path) -> list[tuple[Path, SequenceType]]:
 
 
 def detect_database_type(source: str | Path) -> SequenceType:
-    """Tipo de una base FASTA: ``nucleotide`` o ``protein``.
+    """Type of a FASTA database: ``nucleotide`` or ``protein``.
 
-    Acepta un archivo FASTA o una carpeta (y subcarpetas) con FASTA
-    del mismo tipo.
+    Accepts a FASTA file or a folder (and subfolders) of FASTA files
+    of the same type.
     """
     entries = list_blast_databases(source)
     types = [db_type for _, db_type in entries]
     unique = set(types)
     if len(unique) > 1:
-        logger.info(
-            "detect_database_type: bases mixtas %s",
+        logger.debug(
+            "detect_database_type: mixed databases %s",
             [(str(path), db_type) for path, db_type in entries],
         )
         raise MixedDatabaseTypeError(
@@ -105,8 +108,7 @@ def detect_database_type(source: str | Path) -> SequenceType:
         )
     database_type = types[0]
     logger.info(
-        "detect_database_type: source=%s tipo=%s bases=%s",
-        source,
+        "Database type: %s (%s FASTA file(s))",
         database_type,
         len(entries),
     )

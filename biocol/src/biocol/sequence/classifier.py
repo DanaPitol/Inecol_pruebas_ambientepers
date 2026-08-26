@@ -35,8 +35,8 @@ def _sequence_id(sequence: SequenceLike) -> str:
 
 
 def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
-    """Clasifica una secuencia como ``nucleotide`` o ``protein``.
-    Usa ``Bio.Data.IUPACData``.
+    """Classify a sequence as ``nucleotide`` or ``protein``.
+    Uses ``Bio.Data.IUPACData``.
     """
     residues = _residues(sequence)
     if not residues:
@@ -51,8 +51,8 @@ def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
     else:
         sequence_type = "protein"
 
-    logger.info(
-        "detect_sequence_type: id=%s longitud=%s tipo=%s",
+    logger.debug(
+        "detect_sequence_type: id=%s length=%s type=%s",
         _sequence_id(sequence),
         len(residues),
         sequence_type,
@@ -61,10 +61,10 @@ def detect_sequence_type(sequence: SequenceLike) -> SequenceType:
 
 
 def detect_query_type(records: Iterable[SequenceLike]) -> SequenceType:
-    """Tipo de un FASTA completo: el tipo mayoritario.
+    """Type of a full FASTA: the majority type.
 
-    Si hay secuencias clasificadas distinto (p. ej. péptidos cortos que
-    parecen ADN), no se aborta: se usa proteína en empate.
+    Mixed classifications (e.g. short peptides that look like DNA) do not
+    abort; protein wins ties.
     """
     records_list = list(records)
     types = [detect_sequence_type(record) for record in records_list]
@@ -79,14 +79,14 @@ def detect_query_type(records: Iterable[SequenceLike]) -> SequenceType:
             if seq_type != query_type
         ]
         logger.debug(
-            "detect_query_type: FASTA mixto; se usa %s (protein=%s nucleotide=%s) ids minoría=%s",
+            "detect_query_type: mixed FASTA; using %s (protein=%s nucleotide=%s) minority ids=%s",
             query_type,
             protein_n,
             nucleotide_n,
             minority_ids[:20],
         )
     logger.info(
-        "detect_query_type: FASTA clasificado como %s (%s secuencias)",
+        "Query/database FASTA classified as %s (%s sequences)",
         query_type,
         len(types),
     )

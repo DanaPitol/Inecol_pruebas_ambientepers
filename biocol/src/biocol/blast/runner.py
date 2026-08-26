@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pandas as pd
 
-from biocol.blast.databases import detect_database_type, infer_database_label, list_blast_databases
++from biocol.blast.databases import infer_database_label, list_blast_databases
 from biocol.blast.parser import fill_missing_hits, parse_blast_results
 from biocol.blast.selection import select_blast_program
-from biocol.exceptions import BlastExecutionError
+from biocol.exceptions import BlastExecutionError, MixedDatabaseTypeError
 from biocol.sequence.classifier import detect_query_type
 from biocol.sequence.reader import read_fasta
 
@@ -74,7 +74,7 @@ def _run_command(command: list[str]) -> None:
         raise BlastExecutionError(
             f"'{executable}' was not found in PATH. Activate the conda environment inecol."
         )
-    logger.info("ejecutar: %s", " ".join(command))
+    logger.debug("BLAST+ command: %s", " ".join(command))
     completed = subprocess.run(
         command,
         check=False,
@@ -96,31 +96,61 @@ def run_blast(
     max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
     num_threads: int = DEFAULT_NUM_THREADS,
 ) -> pd.DataFrame:
-    """Ejecuta BLAST+ (un run por FASTA de base) y parsea outfmt 6.
+    """Run BLAST+ (one run per database FASTA) and parse outfmt 6.
 
-    Las bases BLAST se crean en un directorio temporal y se borran al terminar.
-    Si una query no tiene hit en una base, se incluye una fila vacía.
+    BLAST databases are built in a temporary directory and removed afterwards.
+    If a query has no hit in a database, an empty row is included.
     """
     query_path = Path(query)
+    logger.info("Reading query FASTA: %s", query_path)
     records = read_fasta(query_path)
     query_ids = [record.id for record in records]
+    logger.info("Query has %s sequence(s)", len(query_ids))
     query_type = detect_query_type(records)
-    database_type = detect_database_type(database)
+    db_entries = list_blast_databases(database)
+    db_types = {db_type for _, db_type in db_entries}
+    if len(db_types) > 1:
+        raise MixedDatabaseTypeError(
+            "Input mixes nucleotide and protein databases"
+        )
+    database_type = next(iter(db_types))
+    logger.info(
+        "Database type: %s (%s FASTA file(s))",
+        database_type,
+        len(db_entries),
+    )
     program = select_blast_program(
         query_type, database_type, translated=translated
     )
+    logger.info(
+        "Selected %s (query=%s, database=%s, evalue=%s, max_target_seqs=%s, threads=%s)",
+        program,
+        query_type,
+        database_type,
+        evalue,
+        max_target_seqs,
+        num_threads,
+    )
     dbtype = _DBTYPE[database_type]
-    db_entries = list_blast_databases(database)
 
     frames: list[pd.DataFrame] = []
     with tempfile.TemporaryDirectory(prefix="biocol_blast_") as tmp:
         tmp_path = Path(tmp)
-        for fasta_path, _db_type in db_entries:
+        total = len(db_entries)
+        for index, (fasta_path, _db_type) in enumerate(db_entries, start=1):
             file_stem = fasta_path.stem
             db_label = infer_database_label(fasta_path)
             prefix = tmp_path / file_stem
             out_file = tmp_path / f"{file_stem}.txt"
+            logger.info(
+                "[%s/%s] Building BLAST database for %s (%s)",
+                index,
+                total,
+                db_label,
+                fasta_path.name,
+            )
             _run_command(build_makeblastdb_command(fasta_path, prefix, dbtype))
+            logger.info("[%s/%s] Running %s against %s", index, total, program, db_label)
             _run_command(
                 build_blast_command(
                     program,
@@ -137,13 +167,13 @@ def run_blast(
             filled = fill_missing_hits(parsed, query_ids, db_label)
             frames.append(filled)
             logger.info(
-                "run_blast: db=%s archivo=%s hits=%s filas=%s",
+                "[%s/%s] %s: %s BLAST hit(s)",
+                index,
+                total,
                 db_label,
-                file_stem,
                 0 if parsed.empty else len(parsed),
-                len(filled),
             )
 
     combined = pd.concat(frames, ignore_index=True)
-    logger.info("run_blast: programa=%s filas_totales=%s", program, len(combined))
+    logger.info("BLAST finished (%s row(s) including empty hits)", len(combined))
     return combined

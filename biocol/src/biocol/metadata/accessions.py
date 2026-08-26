@@ -26,7 +26,7 @@ _DB_PREFIXES = {
 
 
 def normalize_accession(value: object) -> str:
-    """Quita prefijos tipo ``ref|XP_123.1|`` y deja el accession."""
+    """Strip prefixes such as ``ref|XP_123.1|`` and keep the accession."""
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return ""
     text = str(value).strip()
@@ -46,7 +46,7 @@ def normalize_accession(value: object) -> str:
 
 
 def load_accessions(path: str | Path) -> pd.DataFrame:
-    """Lee ``accession<TAB>descriptor`` (sin encabezado)."""
+    """Read ``accession<TAB>descriptor`` (no header)."""
     acc_path = Path(path)
     if not acc_path.exists():
         raise FileNotFoundError(f"Accessions file not found: {acc_path}")
@@ -71,5 +71,5 @@ def load_accessions(path: str | Path) -> pd.DataFrame:
     frame["accession"] = frame["accession"].str.strip()
     frame["description"] = frame["description"].fillna("").str.strip()
     frame["accession_norm"] = frame["accession"].map(normalize_accession)
-    logger.info("load_accessions: %s filas en %s", len(frame), acc_path)
+    logger.info("Loaded %s accession descriptor(s) from %s", len(frame), acc_path)
     return frame

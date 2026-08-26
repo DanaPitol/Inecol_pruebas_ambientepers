@@ -1,7 +1,8 @@
-"""Columnas y lectura de BLAST tabular ``outfmt 6``."""
+"""Columns and parsing of BLAST tabular ``outfmt 6``."""
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -21,17 +22,21 @@ OUTFMT6_COLUMNS = [
     "bitscore",
 ]
 
+logger = logging.getLogger(__name__)
+
 
 def parse_blast_results(path: str | Path) -> pd.DataFrame:
-    """Lee un archivo BLAST tabular (outfmt 6) a DataFrame.
+    """Read a BLAST tabular file (outfmt 6) into a DataFrame.
 
-    Un archivo vacío (sin hits) devuelve un DataFrame sin filas, con las
-    12 columnas estándar.
+    An empty file (no hits) returns a DataFrame with no rows and the
+    12 standard columns.
     """
     blast_path = Path(path)
     if not blast_path.exists():
         raise FileNotFoundError(f"BLAST file not found: {blast_path}")
+    logger.info("Reading BLAST results: %s", blast_path.name)
     if blast_path.stat().st_size == 0:
+        logger.debug("BLAST tabular is empty: %s", blast_path)
         return pd.DataFrame(columns=OUTFMT6_COLUMNS)
 
     frame = pd.read_csv(
@@ -41,6 +46,7 @@ def parse_blast_results(path: str | Path) -> pd.DataFrame:
         names=OUTFMT6_COLUMNS,
         comment="#",
     )
+    logger.debug("Parsed BLAST tabular %s (%s hit rows)", blast_path, len(frame))
     return frame
 
 
@@ -49,7 +55,7 @@ def fill_missing_hits(
     query_ids: list[str],
     database_name: str,
 ) -> pd.DataFrame:
-    """Asegura una fila por query; si no hubo hit, los campos BLAST van vacíos."""
+    """Ensure one row per query; if there was no hit, BLAST fields are empty."""
     frame = results.copy()
     if "database" not in frame.columns:
         frame["database"] = database_name

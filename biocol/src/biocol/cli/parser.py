@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_OUTPUT
+from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
 from biocol.cli.helptext import render_from_blast_help, render_run_help, render_top_help
 from biocol.cli.style import BOLD, RED, paint
@@ -24,7 +24,6 @@ class _HelpParser(argparse.ArgumentParser):
         return super().format_help()
 
     def error(self, message: str) -> None:
-        # Show the custom screen instead of argparse's short usage blurb.
         sys.stderr.write(self.format_help())
         sys.stderr.write(paint(f"\nerror: {message}\n", BOLD, RED, stream=sys.stderr))
         self.exit(2)
@@ -50,7 +49,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = subparsers.add_parser(
         "run",
-        help="FASTA + databases → BLAST+ → CSV",
+        help="FASTA + databases → BLAST+ → TSV",
         help_renderer=render_run_help,
     )
     run.add_argument(
@@ -64,6 +63,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="FASTA",
         help="Optional query CDS FASTA: Length (nt) and cDNA columns",
+    )
+    run.add_argument(
+        "--protein",
+        default=None,
+        dest="protein_fasta",
+        metavar="FASTA",
+        help="Optional protein FASTA (gene models): fills Length(aa) and protein columns",
     )
     run.add_argument(
         "--db",
@@ -80,8 +86,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--output",
         default=None,
-        metavar="CSV",
-        help=f"Output CSV path (default: {DEFAULT_OUTPUT})",
+        metavar="TSV",
+        help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     run.add_argument(
         "--tblastx",
@@ -106,14 +112,14 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--threads",
         type=int,
-        default=1,
+        default=DEFAULT_NUM_THREADS,
         metavar="N",
-        help="BLAST+ CPU threads (default: 1)",
+        help=f"BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS})",
     )
 
     from_blast = subparsers.add_parser(
         "from-blast",
-        help="Existing BLAST tabular + accessions → CSV (no BLAST+)",
+        help="Existing BLAST tabular + accessions → TSV (no BLAST+)",
         help_renderer=render_from_blast_help,
     )
     from_blast.add_argument(
@@ -131,7 +137,7 @@ def build_parser() -> argparse.ArgumentParser:
     from_blast.add_argument(
         "--output",
         default=None,
-        metavar="CSV",
-        help=f"Output CSV path (default: {DEFAULT_OUTPUT})",
+        metavar="TSV",
+        help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     return parser

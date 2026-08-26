@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_OUTPUT
+from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
 from biocol.cli.style import BOLD, CYAN, DIM, GREEN, MAGENTA, YELLOW, paint
 
@@ -80,7 +80,7 @@ def render_top_help() -> str:
         banner("BLAST Annotation & Integration Tool", stream=s),
         "",
         "BIOCOL processes biological sequence data and generates integrated",
-        "BLAST annotation tables in Dataset S2-style CSV format.",
+        "BLAST annotation tables in Dataset S2-style TSV format.",
         "",
         "It supports two workflows:",
         "",
@@ -94,16 +94,16 @@ def render_top_help() -> str:
         f"{heading('WORKFLOWS', stream=s)}",
         "",
         f"  {cmd('run', stream=s)}",
-        "    FASTA query → BLAST+ → annotations → CSV",
+        "    FASTA query → BLAST+ → annotations → TSV",
         "",
         "    Runs BLAST+ locally against one FASTA file or a directory of FASTA",
         "    databases. Sequence types are detected automatically and the matching",
         "    BLAST program is selected (blastp, blastn, blastx, tblastn, tblastx).",
         "",
-        "    Optional --cdna fills nucleotide gene-model columns.",
+        "    Optional --cdna / --protein fill gene-model columns.",
         "",
         f"  {cmd('from-blast', stream=s)}",
-        "    BLAST outfmt 6 → annotations → CSV",
+        "    BLAST outfmt 6 → annotations → TSV",
         "",
         "    Parses an existing BLAST tabular file and joins accession descriptors",
         "    without running BLAST+ again. Query sequence columns stay empty.",
@@ -117,7 +117,7 @@ def render_top_help() -> str:
             "      --query query.faa \\\n"
             "      --db species.faa \\\n"
             "      --accessions species.txt \\\n"
-            "      --output results.csv",
+            "      --output results.tsv",
             stream=s,
         ),
         "",
@@ -129,7 +129,7 @@ def render_top_help() -> str:
             "      --cdna query_cds.fna \\\n"
             "      --db species.faa \\\n"
             "      --accessions species.txt \\\n"
-            "      --output results.csv",
+            "      --output results.tsv",
             stream=s,
         ),
         "",
@@ -139,7 +139,7 @@ def render_top_help() -> str:
             "    biocol from-blast \\\n"
             "      --blast hits.txt \\\n"
             "      --accessions species.txt \\\n"
-            "      --output results.csv",
+            "      --output results.tsv",
             stream=s,
         ),
         "",
@@ -164,8 +164,9 @@ def render_top_help() -> str:
         "  --accessions is a .txt file: accession<TAB>descriptor.",
         "  It must list SUBJECT ids from --db. Unmatched hits → ---.",
         "  --cdna must be CDS/transcripts, not a whole-genome FASTA.",
+        "  The TSV shows only the best hit per query and species.",
         f"  Defaults: e-value 10, max-target-seqs {DEFAULT_MAX_TARGET_SEQS},",
-        f"  threads 1, output {DEFAULT_OUTPUT}.",
+        f"  threads {DEFAULT_NUM_THREADS}, output {DEFAULT_OUTPUT}.",
         "",
         dim("BIOCOL — bioinformatics sequence annotation from the command line.", stream=s),
         "",
@@ -176,11 +177,10 @@ def render_top_help() -> str:
 def render_run_help() -> str:
     s = sys.stdout
     parts = [
-        banner("run — FASTA → BLAST+ → CSV", stream=s),
+        banner("run — FASTA → BLAST+ → TSV", stream=s),
         "",
         "Run BLAST+ on a FASTA query against one FASTA file or a folder of FASTA",
-        "files (subfolders included). Join descriptors and write a CSV file.",
-        
+        "files (subfolders included). Join descriptors and write a TSV file.",
         "",
         f"{heading('USAGE', stream=s)}",
         "",
@@ -204,6 +204,9 @@ def render_run_help() -> str:
         f"  {opt('--cdna FASTA', stream=s)}",
         "      Fill Length (nt) and cDNA columns. Must be CDS, not genomic DNA.",
         "",
+        f"  {opt('--protein FASTA', stream=s)}",
+        "      Fill Length(aa) and protein columns (gene models).",
+        "",
         f"{heading('BLAST OPTIONS', stream=s)}",
         "",
         f"  {opt('--tblastx', stream=s)}",
@@ -213,12 +216,13 @@ def render_run_help() -> str:
         "      E-value threshold (default: 10).",
         "",
         f"  {opt('--max-target-seqs N', stream=s)}",
-        f"      Hits kept per query (default: {DEFAULT_MAX_TARGET_SEQS}).",
+        f"      Hits kept by BLAST per query (default: {DEFAULT_MAX_TARGET_SEQS}).",
+        "      The TSV still shows only the best hit per species.",
         "",
         f"  {opt('--threads N', stream=s)}",
-        "      BLAST+ CPU threads (default: 1).",
+        f"      BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS}).",
         "",
-        f"  {opt('--output CSV', stream=s)}",
+        f"  {opt('--output TSV', stream=s)}",
         f"      Output path (default: {DEFAULT_OUTPUT}).",
         "",
         f"{heading('PROGRAM SELECTION', stream=s)}",
@@ -236,7 +240,7 @@ def render_run_help() -> str:
         "",
         example(
             "    biocol run --query query.faa --db species.faa \\\n"
-            "      --accessions species.txt --output results.csv",
+            "      --accessions species.txt --output results.tsv",
             stream=s,
         ),
         "",
@@ -244,7 +248,7 @@ def render_run_help() -> str:
         "",
         example(
             "    biocol run --query query.faa --db databases/ \\\n"
-            "      --accessions all_species.txt --output results.csv",
+            "      --accessions all_species.txt --output results.tsv",
             stream=s,
         ),
         "",
@@ -265,7 +269,7 @@ def render_run_help() -> str:
         f"{heading('SEE ALSO', stream=s)}",
         "",
         f"  {cmd('biocol --help', stream=s)}           Overview and quick start.",
-        f"  {cmd('biocol from-blast --help', stream=s)}  CSV from an existing BLAST file.",
+        f"  {cmd('biocol from-blast --help', stream=s)}  TSV from an existing BLAST file.",
         "",
     ]
     return "\n".join(parts)
@@ -274,15 +278,15 @@ def render_run_help() -> str:
 def render_from_blast_help() -> str:
     s = sys.stdout
     parts = [
-        banner("from-blast — BLAST tabular → CSV", stream=s),
+        banner("from-blast — BLAST tabular → TSV", stream=s),
         "",
         "Parse a BLAST outfmt 6 file, join accession descriptors, and write the",
-        "same CSV as path 1. Does not run BLAST+. Sequence columns stay empty.",
+        "same TSV as path 1. Does not run BLAST+. Sequence columns stay empty.",
         "",
         f"{heading('USAGE', stream=s)}",
         "",
         f"  {cmd('biocol from-blast', stream=s)} {opt('--blast', stream=s)} FILE "
-        f"{opt('--accessions', stream=s)} FILE [{opt('--output', stream=s)} CSV]",
+        f"{opt('--accessions', stream=s)} FILE [{opt('--output', stream=s)} TSV]",
         "",
         f"{heading('REQUIRED', stream=s)}",
         "",
@@ -294,14 +298,14 @@ def render_from_blast_help() -> str:
         "",
         f"{heading('OPTIONAL', stream=s)}",
         "",
-        f"  {opt('--output CSV', stream=s)}",
+        f"  {opt('--output TSV', stream=s)}",
         f"      Output path (default: {DEFAULT_OUTPUT}).",
         "",
         f"{heading('EXAMPLES', stream=s)}",
         "",
         example(
             "    biocol from-blast --blast hits.txt \\\n"
-            "      --accessions species.txt --output results.csv",
+            "      --accessions species.txt --output results.tsv",
             stream=s,
         ),
         "",

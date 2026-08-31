@@ -10,9 +10,9 @@ from biocol.sequence.validator import check_fasta_path, validate_seq_record
 
 
 def read_fasta(path: str | Path) -> list[SeqRecord]:
-    """Lee un FASTA o multifasta con ``Bio.SeqIO.parse``.
+    """Read a FASTA or multifasta with ``Bio.SeqIO.parse``.
 
-    Devuelve ``SeqRecord`` de Biopython (id, description, seq).
+    Returns Biopython ``SeqRecord`` objects (id, description, seq).
     """
     fasta_path = check_fasta_path(path)
     try:

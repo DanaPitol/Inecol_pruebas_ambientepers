@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
+from biocol import DEFAULT_BLAST_DIR, DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
 from biocol.cli.style import BOLD, CYAN, DIM, GREEN, MAGENTA, YELLOW, paint
 
@@ -224,6 +224,10 @@ def render_run_help() -> str:
         "",
         f"  {opt('--output TSV', stream=s)}",
         f"      Output path (default: {DEFAULT_OUTPUT}).",
+        "",
+        f"  {opt('--blast-dir DIR', stream=s)}",
+        "      Keep BLAST tabular files (one .txt per database FASTA).",
+        f"      Default: '{DEFAULT_BLAST_DIR}/' next to the TSV.",
         "",
         f"{heading('PROGRAM SELECTION', stream=s)}",
         "",

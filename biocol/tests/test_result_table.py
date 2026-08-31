@@ -73,6 +73,7 @@ def test_wide_table_best_hit_and_descriptions(fixtures_dir: Path) -> None:
     assert best["amborella_description"] == "Amborella protein one"
     assert best["vitis_accession"] == "XP_002.1"
     assert best["vitis_description"] == "Vitis protein two"
+    assert best["amborella_identity_full_query"] == "---"
 
 
 def test_protein_fasta_fills_aa_only(fixtures_dir: Path) -> None:
@@ -113,6 +114,7 @@ def test_write_results_csv_default_name(tmp_path: Path, fixtures_dir: Path, monk
     assert "Accesion No." in set(loaded.iloc[2].astype(str))
     assert "e-value" in set(loaded.iloc[2].astype(str))
     assert "Score" in set(loaded.iloc[2].astype(str))
+    assert "Identity % (full query)" in set(loaded.iloc[2].astype(str))
     assert "amborella" in set(loaded.iloc[1].astype(str))
     assert "vitis" in set(loaded.iloc[1].astype(str))
 
@@ -175,3 +177,21 @@ def test_cds_matches_protein_id_in_header(tmp_path: Path, fixtures_dir: Path) ->
     assert row["gene_id"] == "NP_171609.1"
     assert row["length_nt"] == 28
     assert isinstance(row["cdna_sequence"], str)
+
+
+def test_full_query_identity_column_from_aligned_sequences(fixtures_dir: Path) -> None:
+    sequence = "ATGCGATCGATCGATCGTAGCTAGCTAG"
+    hits = _hits()
+    hits = hits[hits["sseqid"] == "ref|XP_001.1|"].copy()
+    hits["qstart"] = 1
+    hits["qend"] = 28
+    hits["qseq"] = sequence
+    hits["sseq"] = sequence
+    table = build_result_table(
+        hits,
+        fixtures_dir / "accessions.txt",
+        query_fasta=fixtures_dir / "dna.fa",
+    )
+    row = table.iloc[0]
+    assert row["amborella_identity_full_query"] == 100.0
+    assert row["vitis_identity_full_query"] == "---"

@@ -50,5 +50,33 @@ def test_run_help_is_english(capsys) -> None:
     assert "BIOCOL" in text
     assert "PROGRAM SELECTION" in text
     assert "--protein" in text
+    assert "--blast-dir" in text
     assert "results.tsv" in text
     assert "\\033[" not in text
+
+
+def test_cli_prints_stage_logs_on_stderr(
+    tmp_path: Path, fixtures_dir: Path, capsys
+) -> None:
+    output = tmp_path / "out.tsv"
+    code = main(
+        [
+            "--no-color",
+            "from-blast",
+            "--blast",
+            str(fixtures_dir / "blast_outfmt6.txt"),
+            "--accessions",
+            str(fixtures_dir / "accessions.txt"),
+            "--output",
+            str(output),
+        ]
+    )
+    captured = capsys.readouterr()
+    assert code == 0
+    assert str(output) in captured.out
+    assert "biocol" in captured.err
+    assert "Reading BLAST results" in captured.err
+    assert "Joining BLAST hits" in captured.err
+    assert "Wrote TSV" in captured.err
+    assert "Done." in captured.err
+    assert "\\033[" not in captured.err

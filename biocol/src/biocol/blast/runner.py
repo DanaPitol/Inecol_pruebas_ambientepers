@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import shutil
 import subprocess
 import tempfile
@@ -8,8 +9,8 @@ from pathlib import Path
 
 import pandas as pd
 
-+from biocol.blast.databases import infer_database_label, list_blast_databases
-from biocol.blast.parser import fill_missing_hits, parse_blast_results
+from biocol.blast.databases import infer_database_label, list_blast_databases
+from biocol.blast.parser import BLAST_OUTFMT, fill_missing_hits, parse_blast_results
 from biocol.blast.selection import select_blast_program
 from biocol.exceptions import BlastExecutionError, MixedDatabaseTypeError
 from biocol.sequence.classifier import detect_query_type
@@ -20,6 +21,18 @@ logger = logging.getLogger(__name__)
 _DBTYPE = {"nucleotide": "nucl", "protein": "prot"}
 DEFAULT_MAX_TARGET_SEQS = 3
 DEFAULT_NUM_THREADS = 1
+DEFAULT_BLAST_DIR = "blast"
+
+
+def _tabular_filename(stem: str, used: set[str]) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", stem).strip("._") or "db"
+    name = f"{cleaned}.txt"
+    index = 2
+    while name in used:
+        name = f"{cleaned}_{index}.txt"
+        index += 1
+    used.add(name)
+    return name
 
 
 def build_makeblastdb_command(
@@ -58,7 +71,7 @@ def build_blast_command(
         "-out",
         str(out_file),
         "-outfmt",
-        "6",
+        BLAST_OUTFMT,
         "-evalue",
         str(evalue),
         "-max_target_seqs",
@@ -95,10 +108,13 @@ def run_blast(
     evalue: float = 10,
     max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
     num_threads: int = DEFAULT_NUM_THREADS,
+    blast_dir: str | Path | None = None,
 ) -> pd.DataFrame:
     """Run BLAST+ (one run per database FASTA) and parse outfmt 6.
 
-    BLAST databases are built in a temporary directory and removed afterwards.
+    BLAST indexes are built in a temporary directory and removed afterwards.
+    If ``blast_dir`` is set, each BLAST tabular file is kept there (one
+    ``.txt`` per database FASTA). Otherwise the tabular files are discarded.
     If a query has no hit in a database, an empty row is included.
     """
     query_path = Path(query)
@@ -133,6 +149,13 @@ def run_blast(
     )
     dbtype = _DBTYPE[database_type]
 
+    hits_dir: Path | None = None
+    used_names: set[str] = set()
+    if blast_dir is not None:
+        hits_dir = Path(blast_dir)
+        hits_dir.mkdir(parents=True, exist_ok=True)
+        logger.info("Saving BLAST tabular files in %s", hits_dir)
+
     frames: list[pd.DataFrame] = []
     with tempfile.TemporaryDirectory(prefix="biocol_blast_") as tmp:
         tmp_path = Path(tmp)
@@ -141,7 +164,10 @@ def run_blast(
             file_stem = fasta_path.stem
             db_label = infer_database_label(fasta_path)
             prefix = tmp_path / file_stem
-            out_file = tmp_path / f"{file_stem}.txt"
+            if hits_dir is not None:
+                out_file = hits_dir / _tabular_filename(file_stem, used_names)
+            else:
+                out_file = tmp_path / f"{file_stem}.txt"
             logger.info(
                 "[%s/%s] Building BLAST database for %s (%s)",
                 index,
@@ -167,11 +193,12 @@ def run_blast(
             filled = fill_missing_hits(parsed, query_ids, db_label)
             frames.append(filled)
             logger.info(
-                "[%s/%s] %s: %s BLAST hit(s)",
+                "[%s/%s] %s: %s BLAST hit(s)%s",
                 index,
                 total,
                 db_label,
                 0 if parsed.empty else len(parsed),
+                f" → {out_file}" if hits_dir is not None else "",
             )
 
     combined = pd.concat(frames, ignore_index=True)

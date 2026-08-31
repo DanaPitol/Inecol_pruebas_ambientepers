@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-OUTFMT6_COLUMNS = [
+OUTFMT6_STANDARD_COLUMNS = [
     "qseqid",
     "sseqid",
     "pident",
@@ -21,6 +21,11 @@ OUTFMT6_COLUMNS = [
     "evalue",
     "bitscore",
 ]
+OUTFMT6_COLUMNS = [*OUTFMT6_STANDARD_COLUMNS, "nident", "qseq", "sseq"]
+BLAST_OUTFMT = (
+    "6 qseqid sseqid pident length mismatch gapopen "
+    "qstart qend sstart send evalue bitscore nident qseq sseq"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +33,8 @@ logger = logging.getLogger(__name__)
 def parse_blast_results(path: str | Path) -> pd.DataFrame:
     """Read a BLAST tabular file (outfmt 6) into a DataFrame.
 
-    An empty file (no hits) returns a DataFrame with no rows and the
-    12 standard columns.
+    An empty file (no hits) returns a DataFrame with no rows.
+    Accepts classic 12-column outfmt 6 or 15 columns including nident/qseq/sseq.
     """
     blast_path = Path(path)
     if not blast_path.exists():
@@ -43,9 +48,21 @@ def parse_blast_results(path: str | Path) -> pd.DataFrame:
         blast_path,
         sep="\t",
         header=None,
-        names=OUTFMT6_COLUMNS,
         comment="#",
     )
+    width = frame.shape[1]
+    if width >= len(OUTFMT6_COLUMNS):
+        frame = frame.iloc[:, : len(OUTFMT6_COLUMNS)]
+        frame.columns = OUTFMT6_COLUMNS
+    elif width == len(OUTFMT6_STANDARD_COLUMNS):
+        frame.columns = OUTFMT6_STANDARD_COLUMNS
+        frame["nident"] = pd.NA
+        frame["qseq"] = pd.NA
+        frame["sseq"] = pd.NA
+    else:
+        raise ValueError(
+            f"BLAST tabular must have 12 or 15 columns, found {width}: {blast_path}"
+        )
     logger.debug("Parsed BLAST tabular %s (%s hit rows)", blast_path, len(frame))
     return frame
 

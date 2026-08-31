@@ -23,6 +23,7 @@ HIT_LABELS = {
     "accession": "Accesion No.",
     "description": "Description",
     "identity_pct": "Identity %",
+    "identity_full_query": "Identity % (full query)",
     "alignment_length": "Alignment length",
     "evalue": "e-value",
     "score": "Score",
@@ -49,7 +50,7 @@ def drop_empty_query_columns(table: pd.DataFrame) -> pd.DataFrame:
 
 
 def _hit_prefix_and_field(column: str) -> tuple[str, str] | None:
-    for field in HIT_LABELS:
+    for field in sorted(HIT_LABELS, key=len, reverse=True):
         suffix = f"_{field}"
         if column.endswith(suffix):
             return column[: -len(suffix)], field

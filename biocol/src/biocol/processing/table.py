@@ -8,6 +8,7 @@ import pandas as pd
 
 from biocol.blast.parser import OUTFMT6_COLUMNS
 from biocol.metadata.accessions import load_accessions, normalize_accession
+from biocol.processing.identity import full_query_identity_percent
 from biocol.sequence.classifier import detect_query_type
 from biocol.sequence.reader import read_fasta
 
@@ -25,6 +26,7 @@ HIT_FIELDS = [
     ("accession", "sseqid"),
     ("description", "description"),
     ("identity_pct", "pident"),
+    ("identity_full_query", None),
     ("alignment_length", "length"),
     ("evalue", "evalue"),
     ("score", "bitscore"),
@@ -122,6 +124,21 @@ def _query_metadata(
     return pd.DataFrame(list(rows.values()))
 
 
+def _query_length_info(
+    query_fasta: str | Path | None,
+) -> tuple[dict[str, int], bool]:
+    if query_fasta is None:
+        return {}, False
+    records = read_fasta(query_fasta)
+    query_is_nucleotide = detect_query_type(records) == "nucleotide"
+    lengths: dict[str, int] = {}
+    for record in records:
+        length = len("".join(char for char in str(record.seq) if char not in "-."))
+        for key in _record_lookup_keys(record):
+            lengths.setdefault(key, length)
+    return lengths, query_is_nucleotide
+
+
 def _lookup_description(accession: object, accessions: pd.DataFrame) -> str:
     if accession is None or (isinstance(accession, float) and pd.isna(accession)):
         return "---"
@@ -189,8 +206,10 @@ def build_result_table(
         cdna_fasta=cdna_fasta,
         protein_fasta=protein_fasta,
     )
+    query_lengths, query_is_nucleotide = _query_length_info(query_fasta)
 
     table_rows: list[dict] = []
+    dash_fields = {"accession", "description", "identity_full_query"}
     for query_id in query_ids:
         base = query_meta.loc[query_meta["gene_id"] == query_id]
         query_row = base.iloc[0].to_dict() if not base.empty else {
@@ -201,6 +220,9 @@ def build_result_table(
             "protein_sequence": pd.NA,
         }
         row = {column: query_row[column] for column in QUERY_COLUMNS}
+        query_length = query_lengths.get(query_id) or query_lengths.get(
+            _strip_version(query_id), 0
+        )
         for database in databases:
             prefix = _safe_name(str(database))
             match = hits[
@@ -211,18 +233,35 @@ def build_result_table(
             for field, source in HIT_FIELDS:
                 column = f"{prefix}_{field}"
                 if match.empty:
-                    row[column] = "---" if field in {"accession", "description"} else pd.NA
-                else:
-                    value = match.iloc[0][source]
-                    if field == "accession":
-                        if pd.isna(value) or str(value) == "":
-                            row[column] = "---"
-                        else:
-                            row[column] = normalize_accession(value) or str(value)
-                    elif field == "description":
-                        row[column] = value if value else "---"
+                    row[column] = "---" if field in dash_fields else pd.NA
+                    continue
+                if field == "identity_full_query":
+                    subject = match.iloc[0]["sseqid"]
+                    if pd.isna(subject) or str(subject) == "":
+                        row[column] = "---"
+                        continue
+                    hsps = hits[
+                        (hits["qseqid"] == query_id)
+                        & (hits["database"].astype(str) == str(database))
+                        & (hits["sseqid"] == subject)
+                    ]
+                    percent = full_query_identity_percent(
+                        hsps.to_dict("records"),
+                        query_length,
+                        query_is_nucleotide=query_is_nucleotide,
+                    )
+                    row[column] = "---" if percent is None else percent
+                    continue
+                value = match.iloc[0][source]
+                if field == "accession":
+                    if pd.isna(value) or str(value) == "":
+                        row[column] = "---"
                     else:
-                        row[column] = value
+                        row[column] = normalize_accession(value) or str(value)
+                elif field == "description":
+                    row[column] = value if value else "---"
+                else:
+                    row[column] = value
         table_rows.append(row)
 
     table = pd.DataFrame(table_rows)

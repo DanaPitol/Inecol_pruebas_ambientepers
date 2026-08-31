@@ -13,6 +13,19 @@ def test_parse_outfmt6(fixtures_dir: Path) -> None:
     assert frame.loc[frame["qseqid"] == "q2", "pident"].iloc[0] == 88.0
 
 
+def test_parse_outfmt6_with_aligned_sequences(tmp_path: Path) -> None:
+    path = tmp_path / "hits.txt"
+    path.write_text(
+        "q1\tXP_0001\t100.0\t4\t0\t0\t1\t4\t1\t4\t1e-10\t50.0\t4\tACGT\tACGT\n",
+        encoding="utf-8",
+    )
+    frame = parse_blast_results(path)
+    assert list(frame.columns) == OUTFMT6_COLUMNS
+    assert frame.iloc[0]["nident"] == 4
+    assert frame.iloc[0]["qseq"] == "ACGT"
+    assert frame.iloc[0]["sseq"] == "ACGT"
+
+
 def test_parse_empty_file(tmp_path: Path) -> None:
     empty = tmp_path / "sin_hits.txt"
     empty.write_text("", encoding="utf-8")

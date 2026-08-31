@@ -1,4 +1,4 @@
-"""Alfabetos IUPAC tomados de Biopython (``Bio.Data.IUPACData``)."""
+"""IUPAC alphabets from Biopython (``Bio.Data.IUPACData``)."""
 
 from Bio.Data.IUPACData import (
     ambiguous_dna_letters,
@@ -8,9 +8,9 @@ from Bio.Data.IUPACData import (
     unambiguous_rna_letters,
 )
 
-# ADN/ARN con códigos de ambigüedad (K, R, Y, ...). Se solapan con aminoácidos.
+# DNA/RNA with ambiguity codes (K, R, Y, ...). These overlap amino acids.
 NUCLEOTIDE_LETTERS = set((ambiguous_dna_letters + ambiguous_rna_letters).upper())
-# Bases inequívocas: no se confunden con lisina (K), arginina (R), etc.
+# Unambiguous bases: not confused with lysine (K), arginine (R), etc.
 UNAMBIGUOUS_NUCLEOTIDE_LETTERS = set(
     (unambiguous_dna_letters + unambiguous_rna_letters).upper()
 )

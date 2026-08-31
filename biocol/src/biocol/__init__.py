@@ -1,6 +1,7 @@
 """Backend for FASTA reading, BLAST, and result table construction."""
 
 from biocol.blast import (
+    DEFAULT_BLAST_DIR,
     DEFAULT_MAX_TARGET_SEQS,
     DEFAULT_NUM_THREADS,
     detect_database_type,
@@ -33,6 +34,7 @@ from biocol.sequence import (
 __all__ = [
     "BlastError",
     "BlastExecutionError",
+    "DEFAULT_BLAST_DIR",
     "DEFAULT_MAX_TARGET_SEQS",
     "DEFAULT_NUM_THREADS",
     "DEFAULT_OUTPUT",

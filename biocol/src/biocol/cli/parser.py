@@ -5,7 +5,12 @@ from __future__ import annotations
 import argparse
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
+from biocol import (
+    DEFAULT_BLAST_DIR,
+    DEFAULT_MAX_TARGET_SEQS,
+    DEFAULT_NUM_THREADS,
+    DEFAULT_OUTPUT,
+)
 
 from biocol.cli.helptext import render_from_blast_help, render_run_help, render_top_help
 from biocol.cli.style import BOLD, RED, paint
@@ -88,6 +93,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="TSV",
         help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
+    )
+    run.add_argument(
+        "--blast-dir",
+        default=None,
+        dest="blast_dir",
+        metavar="DIR",
+        help=(
+            "Directory for BLAST tabular files (one .txt per database FASTA). "
+            f"Default: '{DEFAULT_BLAST_DIR}' next to the TSV"
+        ),
     )
     run.add_argument(
         "--tblastx",

@@ -12,7 +12,7 @@ FASTA_EXTENSIONS = {".fa", ".fasta", ".fna", ".faa", ".fas"}
 
 
 def check_fasta_path(path: str | Path) -> Path:
-    """Comprueba que la ruta exista, sea un archivo y tenga extensión FASTA."""
+    """Check that the path exists, is a file, and has a FASTA extension."""
     fasta_path = Path(path)
     if not fasta_path.exists():
         raise FileNotFoundError(f"FASTA file not found: {fasta_path}")
@@ -27,7 +27,7 @@ def check_fasta_path(path: str | Path) -> Path:
 
 
 def validate_seq_record(record: SeqRecord, source: str | Path) -> None:
-    """Verifica que un SeqRecord de Biopython tenga secuencia usable."""
+    """Check that a Biopython SeqRecord has a usable sequence."""
     sequence = str(record.seq).upper()
     if not sequence:
         raise InvalidFastaError(f"Sequence '{record.id}' is empty in {source}")
@@ -40,9 +40,9 @@ def validate_seq_record(record: SeqRecord, source: str | Path) -> None:
 
 
 def validate_fasta_file(path: str | Path) -> Path:
-    """Comprueba existencia, extensión y contenido FASTA válido.
+    """Check existence, extension, and valid FASTA content.
 
-    Parsea el archivo una sola vez con ``Bio.SeqIO``.
+    Parses the file once with ``Bio.SeqIO``.
     """
     from biocol.sequence.reader import read_fasta
 

@@ -1,6 +1,6 @@
 # biocol
 
-Backend de la herramienta BLAST de INECOL. Toma una query FASTA (o un BLAST tabular ya existente), la compara contra bases FASTA locales y escribe un **CSV plano** de anotación.
+Backend de la herramienta BLAST de INECOL. Toma una query FASTA (o un BLAST tabular ya existente), la compara contra bases FASTA locales y escribe un **TSV plano** de anotación.
 
 
 ## Requisitos
@@ -23,9 +23,9 @@ pip install -e ".[dev]"
 | Query | FASTA / multifasta: `.fa`, `.fasta`, `.fna`, `.faa`, `.fas`. Todo el archivo debe ser del mismo tipo (ADN, ARN o proteína). `U` cuenta como nucleótido. |
 | Bases | Un FASTA o una **carpeta** (incluye subcarpetas). Mismas extensiones. Todas las bases del mismo tipo. Un BLAST por archivo FASTA. |
 | Accesiones | Texto `accession<TAB>descriptor`, sin encabezado. |
-| BLAST tabular (camino 2) | `outfmt 6` estándar (12 columnas NCBI). |
+| BLAST tabular (camino 2) | `outfmt 6`: 12 columnas NCBI, o 15 si incluye `nident`, `qseq` y `sseq` (lo que escribe `run_blast`). |
 
-Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **3**.
+Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` default **3**, `threads` default **1**. `min_identity` es opcional: si no se pasa, **no hay corte** por % de identidad (`pident`). El TSV muestra solo el **mejor hit** por query y especie.
 
 ## Cómo se elige el programa BLAST
 
@@ -41,7 +41,7 @@ Parámetros de BLAST (modificables): `evalue` default **10**, `max_target_seqs` 
 
 ## Uso
 
-Hay dos caminos al mismo CSV.
+Hay dos caminos al mismo TSV.
 
 ### Camino 1 — FASTA + bases
 
@@ -54,21 +54,24 @@ hits = run_blast(
     translated=False,         # True → tblastx si query y base son nucleótido
     evalue=10,
     max_target_seqs=3,
+    blast_dir="blast",        # tabular outfmt 6; si se omite, no se guarda
+    min_identity=80,          # opcional; si se omite, no se filtra por pident
 )
 table = build_result_table(hits, "accessions.txt", query_fasta="query.fa")
-write_results_csv(table, "results.csv")  # si se omite, usa results.csv
+write_results_csv(table, "results.tsv")  # si se omite, usa results.tsv
 ```
 
-`run_blast` crea bases temporales con `makeblastdb`, lanza un BLAST por FASTA y parsea `outfmt 6`. Si una query no tiene hit en una base, queda una fila vacía.
+`run_blast` crea bases temporales con `makeblastdb` (se borran al terminar), lanza un BLAST por FASTA y parsea `outfmt 6`. Si pasas `blast_dir`, deja ahí un `.txt` por base **sin filtrar**. `min_identity` descarta HSP con `pident` menor al umbral (igual en blastn y blastp). Si una query no tiene hit en una base, queda una fila vacía.
 
 ### Camino 2 — BLAST tabular ya existente
 
 Sin FASTA de query: se rellenan `qseqid` + hits + descriptores; las columnas de secuencia quedan vacías.
 
 ```python
-from biocol import parse_blast_results, build_result_table, write_results_csv
+from biocol import parse_blast_results, filter_hits_by_pident, build_result_table, write_results_csv
 
 hits = parse_blast_results("blast_outfmt6.txt")
+hits = filter_hits_by_pident(hits, 80)  # opcional
 table = build_result_table(hits, "accessions.txt", query_fasta=None)
 write_results_csv(table)
 ```
@@ -80,35 +83,34 @@ Si el tabular no trae columna `database`, se usa el nombre `hit`.
 After `pip install -e ".[dev]"`:
 
 ```bash
-biocol --help
-biocol run --help
-biocol from-blast --help
-
 biocol run --query query.fa --db bases/ --accessions accessions.txt
-biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.csv
-biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna
+biocol run --query query.fa --db bases/ --accessions accessions.txt --min-identity 80
+biocol run --query query.fa --db bases/ --accessions accessions.txt --tblastx --evalue 1e-5 --max-target-seqs 50 --threads 4 --output my_results.tsv --blast-dir blast_hits
+biocol run --query genes.faa --db bases/ --accessions accessions.txt --cdna genes.fna --protein genes.faa
 
 biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt
-biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --output my_results.csv
+biocol from-blast --blast hits.txt --accessions Benincasa_hispida_gd.txt --min-identity 80.5 --output my_results.tsv
 ```
 
-`--output` is optional (default: `results.csv`). Help, errors, and status lines are in English. Colors are on in an interactive terminal; disable with `--no-color` or `NO_COLOR=1`.
+`--output` is optional (default: `results.tsv`). `biocol run` also writes BLAST tabular files to `--blast-dir` (default: `blast/` next to the TSV). Help text and errors are in English.
 
-`from-blast` does not take a query FASTA. The species name in the CSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`). `--accessions` describes **subject** IDs from `--db`, not the query.
+`from-blast` does not take a query FASTA. The species name in the TSV header is the accessions file stem (`Benincasa_hispida_gd.txt` → `Benincasa hispida gd`).
 
-## CSV de salida
+## TSV de salida
 
-CSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No hay celdas combinadas: el nombre de sección y el de la especie se repiten o quedan en la primera columna de cada bloque.
+TSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No hay celdas combinadas: el nombre de sección y el de la especie se repiten o quedan en la primera columna de cada bloque.
 
 1. Sección: vacío en query; `Annotation based on top-BLAST-hit method` en cada bloque BLAST.
 2. Especie: `stem` del FASTA de base (p. ej. `protein`, `amborella`).
-3. Nombres de columna: `Gene ID`, `Length (nt)`, `cDNA Sequences (nt)`, `Length(aa)`, `Protein Sequences (aa)`, y por especie `Accesion No.`, `Description`, `Identity %`, `Alignment length`, `e-value`, `Score`.
+3. Nombres de columna: `Gene ID`, `Length (nt)`, `cDNA Sequences (nt)`, `Length(aa)`, `Protein Sequences (aa)`, y por especie `Accesion No.`, `Description`, `Identity %`, `Identity % (full query)`, `Alignment length`, `e-value`, `Score`.
+
+`Identity %` es el `pident` de BLAST (respecto al alineamiento). `Identity % (full query)` usa las secuencias alineadas `qseq`/`sseq`: posiciones idénticas **únicas** de la query ÷ longitud completa de la query × 100 (aa si la query es proteína, nt si es nucleótido). Varios HSP del mismo sujeto se unen sin contar dos veces un solape. En blastx/tblastx cada aminoácido idéntico cubre 3 nt de la query. `--cdna` no entra en el denominador. Sin hit, sin `qseq`/`sseq` (tabular de 12 columnas) o longitud 0: `---`.
 
 No se incluyen Length (aa) ni secuencia del hit. Sin hit o sin descriptor: `---`.
 
-Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Con `--cdna` (CDS de la query) el primer bloque queda con nucleótido y, si `--query` es proteína, también con aminoácidos.
+Las columnas de query que vayan vacías **no se escriben** (query proteína → sin cDNA; query nucleótido → sin proteína). Si hay modelos de gen, se pueden pasar ambos FASTA (`--cdna` y `--protein`) y el primer bloque queda completo.
 
-Una fila por query y rango de hit (se conservan todos los hits). En Excel, importar el CSV y opcionalmente combinar celdas de las dos primeras filas.
+Una fila por query (solo el mejor hit por especie). En Excel, importar el TSV y opcionalmente combinar celdas de las dos primeras filas.
 
 ## API pública
 
@@ -127,6 +129,7 @@ from biocol import (
     parse_blast_results,
     # Resultados
     load_accessions,
+    filter_hits_by_pident,
     build_result_table,
     write_results_csv,
     QUERY_COLUMNS,
@@ -134,7 +137,7 @@ from biocol import (
 )
 ```
 
-`detect_sequence_type()` acepta `str`, `Bio.Seq.Seq` o `SeqRecord`. `detect_query_type()` clasifica un FASTA completo (error si está mixto).
+`detect_sequence_type()` acepta `str`, `Bio.Seq.Seq` o `SeqRecord`. `detect_query_type()` clasifica un FASTA completo por el tipo mayoritario (en empate, proteína).
 
 Errores: `FastaError`, `EmptyFastaError`, `InvalidFastaError`, `MixedSequenceTypeError`, `BlastError`, `DatabaseError`, `MixedDatabaseTypeError`, `BlastExecutionError`, `MetadataError`.
 
@@ -155,7 +158,7 @@ Al correr Pytest se muestran logs INFO. Fixtures en `tests/fixtures/` (FASTA, BL
 | FASTA de ARN | `nucleotide` |
 | FASTA de proteína | `protein` |
 | Multifasta del mismo tipo | tipo único |
-| Multifasta mixto ADN + proteína | `MixedSequenceTypeError` |
+| Multifasta mixto ADN + proteína | tipo mayoritario (empate → proteína) |
 | Ruta inexistente | `FileNotFoundError` |
 | Extensión no FASTA (p. ej. `.txt`) | `InvalidFastaError` |
 | Archivo vacío / sin secuencias | `EmptyFastaError` |
@@ -175,8 +178,8 @@ src/biocol/           backend
   sequence/           lectura, validación y tipo de query
   blast/              tipo de base, selección, ejecución y parseo tabular
   metadata/           accesiones y descriptores
-  processing/         tabla ancha de resultados
-  output/             escritura del CSV
+  processing/         tabla ancha, identidad (full query) y filtro de HSP
+  output/             escritura del TSV
   cli/                CLI (argparse + comandos run / from-blast)
 tests/                pruebas (pytest)
 tests/fixtures/       FASTA, BLAST outfmt 6 y accesiones de ejemplo

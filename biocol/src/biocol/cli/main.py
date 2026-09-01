@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(stripped)
     try:
         output = _COMMANDS[args.command](args)
-    except (FileNotFoundError, FastaError, BlastError, MetadataError, OSError) as exc:
+    except (FileNotFoundError, FastaError, BlastError, MetadataError, OSError, ValueError) as exc:
         print(paint(f"error: {exc}", BOLD, RED, stream=sys.stderr), file=sys.stderr)
         return 1
     print(paint("Done.", BOLD, GREEN, stream=sys.stderr), file=sys.stderr)

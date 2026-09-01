@@ -5,10 +5,25 @@ from __future__ import annotations
 import argparse
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
+from biocol import (
+    DEFAULT_BLAST_DIR,
+    DEFAULT_MAX_TARGET_SEQS,
+    DEFAULT_NUM_THREADS,
+    DEFAULT_OUTPUT,
+)
 
 from biocol.cli.helptext import render_from_blast_help, render_run_help, render_top_help
 from biocol.cli.style import BOLD, RED, paint
+
+
+def _min_identity(value: str) -> float:
+    try:
+        percent = float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("min-identity must be a number") from exc
+    if percent < 0 or percent > 100:
+        raise argparse.ArgumentTypeError("min-identity must be between 0 and 100")
+    return percent
 
 
 class _HelpParser(argparse.ArgumentParser):
@@ -90,6 +105,16 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
     )
     run.add_argument(
+        "--blast-dir",
+        default=None,
+        dest="blast_dir",
+        metavar="DIR",
+        help=(
+            "Directory for BLAST tabular files (one .txt per database FASTA). "
+            f"Default: '{DEFAULT_BLAST_DIR}' next to the TSV"
+        ),
+    )
+    run.add_argument(
         "--tblastx",
         action="store_true",
         help="If query and database are both nucleotide, use tblastx instead of blastn",
@@ -116,6 +141,14 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="N",
         help=f"BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS})",
     )
+    run.add_argument(
+        "--min-identity",
+        type=_min_identity,
+        default=None,
+        dest="min_identity",
+        metavar="N",
+        help="Keep HSPs with pident >= N (0-100). Omit for no identity cutoff",
+    )
 
     from_blast = subparsers.add_parser(
         "from-blast",
@@ -139,5 +172,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="TSV",
         help=f"Output TSV path (default: {DEFAULT_OUTPUT})",
+    )
+    from_blast.add_argument(
+        "--min-identity",
+        type=_min_identity,
+        default=None,
+        dest="min_identity",
+        metavar="N",
+        help="Keep HSPs with pident >= N (0-100). Omit for no identity cutoff",
     )
     return parser

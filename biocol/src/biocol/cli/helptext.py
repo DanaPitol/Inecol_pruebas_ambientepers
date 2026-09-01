@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 
-from biocol import DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
+from biocol import DEFAULT_BLAST_DIR, DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
 
 from biocol.cli.style import BOLD, CYAN, DIM, GREEN, MAGENTA, YELLOW, paint
 
@@ -222,8 +222,16 @@ def render_run_help() -> str:
         f"  {opt('--threads N', stream=s)}",
         f"      BLAST+ CPU threads (default: {DEFAULT_NUM_THREADS}).",
         "",
+        f"  {opt('--min-identity N', stream=s)}",
+        "      Keep HSPs with BLAST pident >= N (0-100, decimals allowed).",
+        "      Omit for no identity cutoff. Same for blastn/blastp/blastx/tblastn/tblastx.",
+        "",
         f"  {opt('--output TSV', stream=s)}",
         f"      Output path (default: {DEFAULT_OUTPUT}).",
+        "",
+        f"  {opt('--blast-dir DIR', stream=s)}",
+        "      Keep BLAST tabular files (one .txt per database FASTA).",
+        f"      Default: '{DEFAULT_BLAST_DIR}/' next to the TSV.",
         "",
         f"{heading('PROGRAM SELECTION', stream=s)}",
         "",
@@ -286,7 +294,8 @@ def render_from_blast_help() -> str:
         f"{heading('USAGE', stream=s)}",
         "",
         f"  {cmd('biocol from-blast', stream=s)} {opt('--blast', stream=s)} FILE "
-        f"{opt('--accessions', stream=s)} FILE [{opt('--output', stream=s)} TSV]",
+        f"{opt('--accessions', stream=s)} FILE [{opt('--output', stream=s)} TSV] "
+        f"[{opt('--min-identity', stream=s)} N]",
         "",
         f"{heading('REQUIRED', stream=s)}",
         "",
@@ -300,6 +309,10 @@ def render_from_blast_help() -> str:
         "",
         f"  {opt('--output TSV', stream=s)}",
         f"      Output path (default: {DEFAULT_OUTPUT}).",
+        "",
+        f"  {opt('--min-identity N', stream=s)}",
+        "      Keep HSPs with BLAST pident >= N (0-100, decimals allowed).",
+        "      Omit for no identity cutoff.",
         "",
         f"{heading('EXAMPLES', stream=s)}",
         "",

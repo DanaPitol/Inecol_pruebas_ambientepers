@@ -23,7 +23,7 @@ from biocol.exceptions import (
 )
 from biocol.metadata import load_accessions, normalize_accession
 from biocol.output import DEFAULT_OUTPUT, write_results_csv
-from biocol.processing import QUERY_COLUMNS, build_result_table
+from biocol.processing import QUERY_COLUMNS, build_result_table, filter_hits_by_pident
 from biocol.sequence import (
     detect_query_type,
     detect_sequence_type,
@@ -50,6 +50,7 @@ __all__ = [
     "detect_database_type",
     "detect_query_type",
     "detect_sequence_type",
+    "filter_hits_by_pident",
     "list_blast_databases",
     "load_accessions",
     "normalize_accession",

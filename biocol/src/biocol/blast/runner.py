@@ -13,6 +13,7 @@ from biocol.blast.databases import infer_database_label, list_blast_databases
 from biocol.blast.parser import BLAST_OUTFMT, fill_missing_hits, parse_blast_results
 from biocol.blast.selection import select_blast_program
 from biocol.exceptions import BlastExecutionError, MixedDatabaseTypeError
+from biocol.processing.hsp_filter import filter_hits_by_pident
 from biocol.sequence.classifier import detect_query_type
 from biocol.sequence.reader import read_fasta
 
@@ -109,13 +110,16 @@ def run_blast(
     max_target_seqs: int = DEFAULT_MAX_TARGET_SEQS,
     num_threads: int = DEFAULT_NUM_THREADS,
     blast_dir: str | Path | None = None,
+    min_identity: float | None = None,
 ) -> pd.DataFrame:
     """Run BLAST+ (one run per database FASTA) and parse outfmt 6.
 
     BLAST indexes are built in a temporary directory and removed afterwards.
     If ``blast_dir`` is set, each BLAST tabular file is kept there (one
-    ``.txt`` per database FASTA). Otherwise the tabular files are discarded.
-    If a query has no hit in a database, an empty row is included.
+    ``.txt`` per database FASTA, unfiltered). Otherwise the tabular files
+    are discarded. ``min_identity`` drops HSPs whose ``pident`` is below
+    that cutoff after parsing. If a query has no hit in a database, an
+    empty row is included.
     """
     query_path = Path(query)
     logger.info("Reading query FASTA: %s", query_path)
@@ -202,5 +206,6 @@ def run_blast(
             )
 
     combined = pd.concat(frames, ignore_index=True)
+    combined = filter_hits_by_pident(combined, min_identity, query_ids=query_ids)
     logger.info("BLAST finished (%s row(s) including empty hits)", len(combined))
     return combined

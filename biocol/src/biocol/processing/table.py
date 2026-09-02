@@ -167,34 +167,48 @@ def _empty_pfam_row() -> dict:
     return {column: "---" for column in PFAM_COLUMNS}
 
 
-def _pfam_lookup(hmm_hits: pd.DataFrame) -> dict[str, dict]:
-    by_query: dict[str, dict] = {}
+def _pfam_lookup(hmm_hits: pd.DataFrame) -> dict[str, list[dict]]:
+    by_query: dict[str, list[dict]] = {}
     if hmm_hits.empty:
         return by_query
-    for record in hmm_hits.to_dict("records"):
+    ordered = hmm_hits.copy()
+    if "evalue" in ordered.columns:
+        ordered["_e"] = pd.to_numeric(ordered["evalue"], errors="coerce")
+        ordered = ordered.sort_values(["query_name", "_e"], na_position="last")
+    for record in ordered.to_dict("records"):
         query_name = str(record.get("query_name", "")).strip()
-        if query_name and query_name not in by_query:
-            by_query[query_name] = record
-            by_query.setdefault(_strip_version(query_name), record)
+        if not query_name:
+            continue
+        by_query.setdefault(query_name, []).append(record)
+        stripped = _strip_version(query_name)
+        if stripped != query_name:
+            by_query.setdefault(stripped, []).append(record)
     return by_query
 
 
-def _pfam_fields_for_query(query_id: str, by_query: dict[str, dict]) -> dict:
-    record = by_query.get(query_id) or by_query.get(_strip_version(query_id))
-    if not record:
+def _pfam_cell(records: list[dict], key: str) -> str:
+    values: list[str] = []
+    for record in records:
+        raw = record.get(key)
+        if raw is None or (isinstance(raw, float) and pd.isna(raw)):
+            continue
+        text = str(raw).strip()
+        if text in {"", "-", "nan", "<NA>"}:
+            continue
+        values.append(text)
+    return "; ".join(values) if values else "---"
+
+
+def _pfam_fields_for_query(query_id: str, by_query: dict[str, list[dict]]) -> dict:
+    records = by_query.get(query_id) or by_query.get(_strip_version(query_id)) or []
+    if not records:
         return _empty_pfam_row()
-    accession = record.get("target_accession")
-    if accession is None or str(accession).strip() in {"", "-", "nan", "<NA>"}:
-        accession = "---"
-    name = record.get("target_name")
-    if not name or str(name).strip() in {"", "nan", "<NA>"}:
-        name = "---"
     return {
-        "pfam_n_domains": 1,
-        "pfam_evalue": record.get("evalue"),
-        "pfam_score": record.get("score"),
-        "pfam_accession": accession,
-        "pfam_name": name,
+        "pfam_n_domains": len(records),
+        "pfam_evalue": _pfam_cell(records, "evalue"),
+        "pfam_score": _pfam_cell(records, "score"),
+        "pfam_accession": _pfam_cell(records, "target_accession"),
+        "pfam_name": _pfam_cell(records, "target_name"),
     }
 
 
@@ -210,7 +224,8 @@ def build_result_table(
 
     One row per query with the best hit per database (lowest e-value,
     highest score). BLAST may return more subjects; only the top hit is shown.
-    If ``hmm_hits`` is provided, a Pfam block is appended (best hmmscan hit).
+    If ``hmm_hits`` is provided, a Pfam block is appended with every
+    hmmscan hit that passed the cutoff (several domains per protein).
     """
     logger.info("Joining BLAST hits with accession descriptors")
     accessions = load_accessions(accessions_path)

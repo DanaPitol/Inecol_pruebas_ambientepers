@@ -106,7 +106,7 @@ TSV con **tres filas de cabecera**, como Dataset S2 (sin Pfam, KEGG ni GO). No h
 
 1. Sección: vacío en query; `Annotation based on top-BLAST-hit method` en cada bloque BLAST; `Pfam domains` al final si hubo hmmscan.
 2. Especie: `stem` del FASTA de base (p. ej. `protein`, `amborella`). Vacío en Pfam.
-3. Nombres de columna: `Gene ID`, `Length (nt)`, `cDNA Sequences (nt)`, `Length(aa)`, `Protein Sequences (aa)`, y por especie `Accesion No.`, `Description`, `Identity %`, `Identity % (full query)`, `Alignment length`, `e-value`, `Score`. Si hay hmmscan: `# of Pfam domain identified`, `e-value`, `score`, `Accesion`, `Name` (mejor hit; sin dominio → `---`).
+3. Nombres de columna: `Gene ID`, `Length (nt)`, `cDNA Sequences (nt)`, `Length(aa)`, `Protein Sequences (aa)`, y por especie `Accesion No.`, `Description`, `Identity %`, `Identity % (full query)`, `Alignment length`, `e-value`, `Score`. Si hay hmmscan: `# of Pfam domain identified`, `e-value`, `score`, `Accesion`, `Name` (todos los dominios que pasaron el corte, separados por `; `; sin dominio → `---`).
 
 `Identity %` es el `pident` de BLAST (respecto al alineamiento). `Identity % (full query)` usa las secuencias alineadas `qseq`/`sseq`: posiciones idénticas **únicas** de la query ÷ longitud completa de la query × 100 (aa si la query es proteína, nt si es nucleótido). Varios HSP del mismo sujeto se unen sin contar dos veces un solape. En blastx/tblastx cada aminoácido idéntico cubre 3 nt de la query. `--cdna` no entra en el denominador. Sin hit, sin `qseq`/`sseq` (tabular de 12 columnas) o longitud 0: `---`.
 

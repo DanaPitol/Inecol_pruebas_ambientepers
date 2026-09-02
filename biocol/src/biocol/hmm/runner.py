@@ -10,7 +10,7 @@ import pandas as pd
 
 from biocol.exceptions import HmmError
 from biocol.hmm.execute import run_hmmer
-from biocol.hmm.parser import best_hmmscan_hits, parse_hmmscan_tblout
+from biocol.hmm.parser import parse_hmmscan_tblout
 from biocol.hmm.press import ensure_pressed_hmm, hmm_has_gathering_threshold
 from biocol.sequence.classifier import detect_query_type
 from biocol.sequence.reader import read_fasta
@@ -59,7 +59,8 @@ def run_hmmscan(
 
     Requires a protein FASTA. Presses the HMM with hmmpress if needed.
     Uses ``--cut_ga`` when the HMM defines gathering thresholds, otherwise
-    ``-E`` (default 10). Returns one best hit per query (lowest e-value).
+    ``-E`` (default 10). Returns every tblout hit that passed that cutoff
+    (several domains per protein are kept).
     """
     query_path = Path(query)
     hmm_path = Path(hmm_db)
@@ -86,9 +87,8 @@ def run_hmmscan(
             )
         )
         parsed = parse_hmmscan_tblout(tblout)
-        best = best_hmmscan_hits(parsed)
-        logger.info("hmmscan best hits: %s of %s row(s)", len(best), len(parsed))
-        return best
+        logger.info("hmmscan hits passing cutoff: %s row(s)", len(parsed))
+        return parsed
 
     if hmm_dir is not None:
         dest = Path(hmm_dir)

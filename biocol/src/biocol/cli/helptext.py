@@ -5,7 +5,13 @@ from __future__ import annotations
 import os
 import sys
 
-from biocol import DEFAULT_BLAST_DIR, DEFAULT_MAX_TARGET_SEQS, DEFAULT_NUM_THREADS, DEFAULT_OUTPUT
+from biocol import (
+    DEFAULT_BLAST_DIR,
+    DEFAULT_HMM_DIR,
+    DEFAULT_MAX_TARGET_SEQS,
+    DEFAULT_NUM_THREADS,
+    DEFAULT_OUTPUT,
+)
 
 from biocol.cli.style import BOLD, CYAN, DIM, GREEN, MAGENTA, YELLOW, paint
 
@@ -233,6 +239,18 @@ def render_run_help() -> str:
         "      Keep BLAST tabular files (one .txt per database FASTA).",
         f"      Default: '{DEFAULT_BLAST_DIR}/' next to the TSV.",
         "",
+        f"{heading('HMMER / PFAM', stream=s)}  {dim('(optional)', stream=s)}",
+        "",
+        f"  {opt('--hmm-db HMM', stream=s)}",
+        "      HMMER profile database (e.g. Pfam-A.hmm). Runs hmmscan on the",
+        "      protein --query. Presses with hmmpress if .h3m/.h3i/.h3f/.h3p",
+        "      are missing. Uses --cut_ga when the HMM has GA lines, else -E 10.",
+        "      Query must be protein (error otherwise).",
+        "",
+        f"  {opt('--hmm-dir DIR', stream=s)}",
+        "      Save hmmscan tblout as hmmscan.tbl.",
+        f"      Default: '{DEFAULT_HMM_DIR}/' next to the TSV (only with --hmm-db).",
+        "",
         f"{heading('PROGRAM SELECTION', stream=s)}",
         "",
         "  Query vs database decides the BLAST program:",
@@ -268,11 +286,20 @@ def render_run_help() -> str:
             stream=s,
         ),
         "",
+        "  Protein query plus Pfam (hmmscan):",
+        "",
+        example(
+            "    biocol run --query query.faa --db species.faa \\\n"
+            "      --accessions species.txt --hmm-db Pfam-A.hmm",
+            stream=s,
+        ),
+        "",
         f"{heading('NOTES', stream=s)}",
         "",
         "  --accessions must match SUBJECT ids in --db, not the query.",
         "  Missing descriptors are written as ---.",
         "  Empty query columns (e.g. cDNA on a protein-only run) are omitted.",
+        "  --hmm-db is optional; omit it to skip hmmscan.",
         "",
         f"{heading('SEE ALSO', stream=s)}",
         "",
@@ -295,7 +322,7 @@ def render_from_blast_help() -> str:
         "",
         f"  {cmd('biocol from-blast', stream=s)} {opt('--blast', stream=s)} FILE "
         f"{opt('--accessions', stream=s)} FILE [{opt('--output', stream=s)} TSV] "
-        f"[{opt('--min-identity', stream=s)} N]",
+        f"[{opt('--min-identity', stream=s)} N] [{opt('--hmm-db', stream=s)} HMM]",
         "",
         f"{heading('REQUIRED', stream=s)}",
         "",
@@ -313,6 +340,15 @@ def render_from_blast_help() -> str:
         f"  {opt('--min-identity N', stream=s)}",
         "      Keep HSPs with BLAST pident >= N (0-100, decimals allowed).",
         "      Omit for no identity cutoff.",
+        "",
+        f"  {opt('--hmm-db HMM', stream=s)}",
+        "      Run hmmscan; requires --protein (amino-acid FASTA).",
+        "",
+        f"  {opt('--protein FASTA', stream=s)}",
+        "      Protein query for hmmscan when --hmm-db is set.",
+        "",
+        f"  {opt('--hmm-dir DIR', stream=s)}",
+        f"      hmmscan tblout directory (default: {DEFAULT_HMM_DIR}/ next to the TSV).",
         "",
         f"{heading('EXAMPLES', stream=s)}",
         "",

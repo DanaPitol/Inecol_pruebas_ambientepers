@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sys
 
-from biocol import BlastError, FastaError, MetadataError
+from biocol import BlastError, FastaError, HmmError, MetadataError
 
 from biocol.cli.commands import run_from_blast, run_from_fasta
 from biocol.cli.parser import build_parser
@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(stripped)
     try:
         output = _COMMANDS[args.command](args)
-    except (FileNotFoundError, FastaError, BlastError, MetadataError, OSError, ValueError) as exc:
+    except (FileNotFoundError, FastaError, BlastError, HmmError, MetadataError, OSError, ValueError) as exc:
         print(paint(f"error: {exc}", BOLD, RED, stream=sys.stderr), file=sys.stderr)
         return 1
     print(paint("Done.", BOLD, GREEN, stream=sys.stderr), file=sys.stderr)

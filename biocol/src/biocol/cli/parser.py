@@ -7,6 +7,7 @@ import sys
 
 from biocol import (
     DEFAULT_BLAST_DIR,
+    DEFAULT_HMM_DIR,
     DEFAULT_MAX_TARGET_SEQS,
     DEFAULT_NUM_THREADS,
     DEFAULT_OUTPUT,
@@ -149,6 +150,26 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="N",
         help="Keep HSPs with pident >= N (0-100). Omit for no identity cutoff",
     )
+    run.add_argument(
+        "--hmm-db",
+        default=None,
+        dest="hmm_db",
+        metavar="HMM",
+        help=(
+            "Optional HMMER HMM database (e.g. Pfam-A.hmm). Runs hmmscan on a "
+            "protein query; hmmpress if indexes are missing"
+        ),
+    )
+    run.add_argument(
+        "--hmm-dir",
+        default=None,
+        dest="hmm_dir",
+        metavar="DIR",
+        help=(
+            "Directory for hmmscan tblout (hmmscan.tbl). "
+            f"Default: '{DEFAULT_HMM_DIR}' next to the TSV (only if --hmm-db is set)"
+        ),
+    )
 
     from_blast = subparsers.add_parser(
         "from-blast",
@@ -180,5 +201,28 @@ def build_parser() -> argparse.ArgumentParser:
         dest="min_identity",
         metavar="N",
         help="Keep HSPs with pident >= N (0-100). Omit for no identity cutoff",
+    )
+    from_blast.add_argument(
+        "--hmm-db",
+        default=None,
+        dest="hmm_db",
+        metavar="HMM",
+        help="Optional HMMER HMM database; requires --protein (amino-acid FASTA)",
+    )
+    from_blast.add_argument(
+        "--protein",
+        default=None,
+        dest="protein_fasta",
+        metavar="FASTA",
+        help="Protein FASTA for hmmscan when --hmm-db is set",
+    )
+    from_blast.add_argument(
+        "--hmm-dir",
+        default=None,
+        dest="hmm_dir",
+        metavar="DIR",
+        help=(
+            f"Directory for hmmscan tblout. Default: '{DEFAULT_HMM_DIR}' next to the TSV"
+        ),
     )
     return parser

@@ -32,6 +32,14 @@ HIT_FIELDS = [
     ("score", "bitscore"),
 ]
 
+PFAM_COLUMNS = [
+    "pfam_n_domains",
+    "pfam_evalue",
+    "pfam_score",
+    "pfam_accession",
+    "pfam_name",
+]
+
 
 def _safe_name(name: str) -> str:
     cleaned = re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_")
@@ -155,17 +163,54 @@ def _lookup_description(accession: object, accessions: pd.DataFrame) -> str:
     return "---"
 
 
+def _empty_pfam_row() -> dict:
+    return {column: "---" for column in PFAM_COLUMNS}
+
+
+def _pfam_lookup(hmm_hits: pd.DataFrame) -> dict[str, dict]:
+    by_query: dict[str, dict] = {}
+    if hmm_hits.empty:
+        return by_query
+    for record in hmm_hits.to_dict("records"):
+        query_name = str(record.get("query_name", "")).strip()
+        if query_name and query_name not in by_query:
+            by_query[query_name] = record
+            by_query.setdefault(_strip_version(query_name), record)
+    return by_query
+
+
+def _pfam_fields_for_query(query_id: str, by_query: dict[str, dict]) -> dict:
+    record = by_query.get(query_id) or by_query.get(_strip_version(query_id))
+    if not record:
+        return _empty_pfam_row()
+    accession = record.get("target_accession")
+    if accession is None or str(accession).strip() in {"", "-", "nan", "<NA>"}:
+        accession = "---"
+    name = record.get("target_name")
+    if not name or str(name).strip() in {"", "nan", "<NA>"}:
+        name = "---"
+    return {
+        "pfam_n_domains": 1,
+        "pfam_evalue": record.get("evalue"),
+        "pfam_score": record.get("score"),
+        "pfam_accession": accession,
+        "pfam_name": name,
+    }
+
+
 def build_result_table(
     blast_hits: pd.DataFrame,
     accessions_path: str | Path,
     query_fasta: str | Path | None = None,
     cdna_fasta: str | Path | None = None,
     protein_fasta: str | Path | None = None,
+    hmm_hits: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Wide Dataset S2-style table (no Pfam/KEGG/GO).
+    """Wide Dataset S2-style table (Pfam optional; no KEGG/GO).
 
     One row per query with the best hit per database (lowest e-value,
     highest score). BLAST may return more subjects; only the top hit is shown.
+    If ``hmm_hits`` is provided, a Pfam block is appended (best hmmscan hit).
     """
     logger.info("Joining BLAST hits with accession descriptors")
     accessions = load_accessions(accessions_path)
@@ -207,6 +252,7 @@ def build_result_table(
         protein_fasta=protein_fasta,
     )
     query_lengths, query_is_nucleotide = _query_length_info(query_fasta)
+    pfam_by_query = _pfam_lookup(hmm_hits) if hmm_hits is not None else None
 
     table_rows: list[dict] = []
     dash_fields = {"accession", "description", "identity_full_query"}
@@ -262,6 +308,8 @@ def build_result_table(
                     row[column] = value if value else "---"
                 else:
                     row[column] = value
+        if pfam_by_query is not None:
+            row.update(_pfam_fields_for_query(query_id, pfam_by_query))
         table_rows.append(row)
 
     table = pd.DataFrame(table_rows)

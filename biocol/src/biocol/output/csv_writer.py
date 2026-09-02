@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from biocol.processing.table import QUERY_COLUMNS
+from biocol.processing.table import PFAM_COLUMNS, QUERY_COLUMNS
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,15 @@ HIT_LABELS = {
 }
 
 BLAST_SECTION = "Annotation based on top-BLAST-hit method"
+PFAM_SECTION = "Pfam domains"
+
+PFAM_LABELS = {
+    "pfam_n_domains": "# of Pfam domain identified",
+    "pfam_evalue": "e-value",
+    "pfam_score": "score",
+    "pfam_accession": "Accesion",
+    "pfam_name": "Name",
+}
 
 
 def _column_has_values(series: pd.Series) -> bool:
@@ -61,7 +70,12 @@ def format_s2_csv(table: pd.DataFrame) -> pd.DataFrame:
     """Table with a 3-row header and per-species blocks, Dataset S2 style."""
     frame = drop_empty_query_columns(table)
     query_cols = [column for column in QUERY_COLUMNS if column in frame.columns]
-    hit_cols = [column for column in frame.columns if column not in QUERY_COLUMNS]
+    pfam_cols = [column for column in PFAM_COLUMNS if column in frame.columns]
+    hit_cols = [
+        column
+        for column in frame.columns
+        if column not in QUERY_COLUMNS and column not in PFAM_COLUMNS
+    ]
 
     prefixes: list[str] = []
     for column in hit_cols:
@@ -75,6 +89,7 @@ def format_s2_csv(table: pd.DataFrame) -> pd.DataFrame:
             name = f"{prefix}_{field}"
             if name in frame.columns:
                 ordered.append(name)
+    ordered.extend(pfam_cols)
     frame = frame.loc[:, ordered]
 
     section_row: list[str] = []
@@ -85,6 +100,12 @@ def format_s2_csv(table: pd.DataFrame) -> pd.DataFrame:
             section_row.append("")
             species_row.append("")
             label_row.append(QUERY_LABELS[column])
+            continue
+        if column in PFAM_LABELS:
+            is_block_start = column == pfam_cols[0] if pfam_cols else False
+            section_row.append(PFAM_SECTION if is_block_start else "")
+            species_row.append("")
+            label_row.append(PFAM_LABELS[column])
             continue
         parsed = _hit_prefix_and_field(column)
         prefix, field = parsed if parsed else (column, "")

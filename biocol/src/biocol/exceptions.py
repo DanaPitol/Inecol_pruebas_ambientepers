@@ -32,3 +32,11 @@ class BlastExecutionError(BlastError):
 
 class MetadataError(ValueError):
     """The accessions/descriptors file is invalid."""
+
+
+class HmmError(ValueError):
+    """Base error for HMMER / hmmscan."""
+
+
+class HmmExecutionError(HmmError):
+    """hmmpress or hmmscan execution failed."""

@@ -38,6 +38,7 @@ PFAM_LABELS = {
     "pfam_score": "score",
     "pfam_accession": "Accesion",
     "pfam_name": "Name",
+    "pfam_description": "Description of target",
 }
 
 

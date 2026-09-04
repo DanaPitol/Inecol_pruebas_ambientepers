@@ -38,6 +38,7 @@ PFAM_COLUMNS = [
     "pfam_score",
     "pfam_accession",
     "pfam_name",
+    "pfam_description",
 ]
 
 
@@ -209,6 +210,7 @@ def _pfam_fields_for_query(query_id: str, by_query: dict[str, list[dict]]) -> di
         "pfam_score": _pfam_cell(records, "score"),
         "pfam_accession": _pfam_cell(records, "target_accession"),
         "pfam_name": _pfam_cell(records, "target_name"),
+        "pfam_description": _pfam_cell(records, "description"),
     }
 
 
